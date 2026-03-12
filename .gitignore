@@ -1,0 +1,7 @@
+/.idea/
+/.vscode/
+/node_modules/
+.npmrc
+.yarnrc
+npm-debug.log
+yarn-error.log

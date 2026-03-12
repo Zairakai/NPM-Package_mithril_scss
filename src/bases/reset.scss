@@ -1,0 +1,191 @@
+/// ========================
+/// Document
+/// ========================
+
+/// Ensure box-sizing includes padding and border in width and height calculations.
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/// Hide focus ring for pointer/mouse users, show for keyboard users.
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/// 1. Set default line height for consistent spacing across all browsers.
+/// 2. Prevent font size adjustment on orientation change in iOS.
+html {
+  font-family: sans-serif;
+  line-height: 1.15; /// 1
+  text-size-adjust: 100%; /// 2
+}
+
+/// Ensure minimum height matches the viewport.
+html,
+body {
+  min-height: 100dvh;
+}
+
+/// Remove default margin and padding from the body element.
+body {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+/// ========================
+/// Embedded content
+/// ========================
+
+/// Block-level display and constrain media to their container.
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/// Remove borders around images within links.
+img {
+  border: none;
+}
+
+/// Fix overflow issues in SVG elements.
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/// ========================
+/// Typography
+/// ========================
+
+/// 1. Ensure correct box-sizing in Firefox for hr elements.
+/// 2. Allow overflow to be visible in Edge.
+hr {
+  box-sizing: content-box; /// 1
+  height: 0; /// 1
+  overflow: visible; /// 2
+}
+
+/// Remove the gray background on active links in IE 10.
+a {
+  background-color: transparent;
+  cursor: pointer;
+}
+
+/// Improve readability when links are focused or hovered.
+a:active,
+a:hover {
+  outline: 0;
+}
+
+/// Allow scrolling for long pre-formatted content.
+pre {
+  overflow: auto;
+}
+
+/// ========================
+/// Forms
+/// ========================
+
+/// Ensure consistent font styles and reset margin across browsers.
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: normal;
+  color: inherit;
+  margin: 0;
+}
+
+/// Prevent hidden overflow in IE and Edge.
+button,
+input {
+  overflow: visible;
+}
+
+/// Prevent text-transform inheritance in Edge and Firefox.
+button,
+select {
+  text-transform: none;
+}
+
+/// Cursor affordance for interactive elements.
+button,
+details,
+input[type="button"],
+input[type="checkbox"],
+input[type="file"],
+input[type="image"],
+input[type="radio"],
+input[type="range"],
+input[type="reset"],
+input[type="submit"],
+label,
+select {
+  cursor: pointer;
+}
+
+/// Revert cursor to default for disabled elements.
+button[disabled],
+input[disabled] {
+  cursor: default;
+}
+
+/// Consistent box-sizing for checkboxes and radios.
+[type="checkbox"],
+[type="radio"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+/// Add consistent padding and border styling for fieldsets.
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 6px 12px 10px;
+}
+
+/// Fix text wrapping and color inheritance for legend.
+legend {
+  box-sizing: border-box;
+  color: inherit;
+  display: table;
+  max-width: 100%;
+  border: 0;
+  padding: 0;
+  white-space: normal;
+}
+
+/// ========================
+/// Tables
+/// ========================
+
+/// Remove default spacing between table cells.
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/// Remove default padding from table cells.
+td,
+th {
+  padding: 0;
+}
+
+/// ========================
+/// Misc
+/// ========================
+
+/// Ensure hidden elements are not displayed.
+[hidden],
+template {
+  display: none;
+}

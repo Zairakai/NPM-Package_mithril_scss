@@ -1,0 +1,82 @@
+{
+  "name": "@zairakai/mithril-scss",
+  "version": "0.0.0",
+  "description": "Mithril is a lightweight and indestructible modular SCSS framework for building responsive layouts with a clean grid system.",
+  "keywords": [
+    "mithril",
+    "css",
+    "framework",
+    "grid",
+    "mobile-first",
+    "responsive",
+    "scss",
+    "spacing"
+  ],
+  "homepage": "https://gitlab.com/zairakai/npm-packages/mithril-scss",
+  "bugs": {
+    "url": "https://gitlab.com/zairakai/npm-packages/mithril-scss/-/issues",
+    "email": "contact-project+zairakai-npm-packages-mithril-scss-80191208-issue-@incoming.gitlab.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/zairakai/npm-packages/mithril-scss.git"
+  },
+  "funding": [
+    {
+      "type": "patreon",
+      "url": "https://www.patreon.com/c/zairakai"
+    },
+    {
+      "type": "twitch",
+      "url": "https://www.twitch.tv/zairakai"
+    }
+  ],
+  "license": "MIT",
+  "author": "Stanislas Poisson <stanislas.p@the-white-rabbits.fr> (https://the-white-rabbits.fr)",
+  "contributors": [
+    {
+      "name": "Stanislas Poisson",
+      "url": "https://gitlab.com/zairakai",
+      "role": "Maintainer"
+    }
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./src/index.scss",
+    "./bases/*.scss": "./src/bases/*.scss"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "eslint": "bash node_modules/@zairakai/js-dev-tools/scripts/eslint.sh",
+    "eslint:fix": "bash node_modules/@zairakai/js-dev-tools/scripts/eslint-fix.sh",
+    "markdownlint": "bash node_modules/@zairakai/js-dev-tools/scripts/markdownlint.sh",
+    "markdownlint:fix": "bash node_modules/@zairakai/js-dev-tools/scripts/markdownlint-fix.sh",
+    "postinstall": "bash node_modules/@zairakai/js-dev-tools/scripts/setup-project.sh --silent || true",
+    "prettier": "bash node_modules/@zairakai/js-dev-tools/scripts/prettier.sh",
+    "prettier:fix": "bash node_modules/@zairakai/js-dev-tools/scripts/prettier-fix.sh",
+    "setup": "bash node_modules/@zairakai/js-dev-tools/scripts/setup-project.sh",
+    "stylelint": "bash node_modules/@zairakai/js-dev-tools/scripts/stylelint.sh",
+    "stylelint:fix": "bash node_modules/@zairakai/js-dev-tools/scripts/stylelint-fix.sh",
+    "normalize": "make package-normalize",
+    "package:validate": "make package-validate",
+    "test": "make test-all",
+    "validate": "make quality"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "@zairakai/js-dev-tools": "^1.0.0",
+    "knip": "^5.86.0",
+    "sass": "^1.83.0",
+    "sort-package-json": "^3.6.1",
+    "vitest": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

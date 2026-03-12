@@ -1,0 +1,20 @@
+@use "variables" as MithrilVariables;
+@use "functions" as MithrilFunctions;
+@use "mixins" as MithrilMixins;
+
+/// Documentation for spacing.scss
+/// This file defines spacing utility classes for padding, margin, and gap.
+/// Each utility class is generated dynamically based on values from the `$spacings` map
+/// defined in the 'variables' module. The classes are created with a `px-to-rem()` conversion.
+@each $key, $value in MithrilVariables.$spacings {
+  /// Generate padding utility classes
+  @include MithrilMixins.generate-spacing-utilities($key, $value, "p", "padding");
+
+  /// Generate margin utility classes
+  @include MithrilMixins.generate-spacing-utilities($key, $value, "m", "margin");
+
+  /// Gap utility class for spacing between elements
+  %gap-#{$key} {
+    gap: MithrilFunctions.px-to-rem($value);
+  }
+}

@@ -1,0 +1,1077 @@
+@use "sass:list";
+@use "sass:map";
+
+/// --------------------------------------------
+/// File : _variables.scss
+/// Description : Global variables (colors, spacings, typography, breakpoints).
+/// --------------------------------------------
+
+/// ========================
+/// Used Variables
+/// ========================
+$used-variables: ();
+
+@function add-used-variable($var-name) {
+  @if not map.has-key($used-variables, $var-name) {
+    $used-variables: map.merge(
+      $used-variables,
+      (
+        $var-name: true,
+      )
+    ) !global;
+  }
+
+  @return $used-variables;
+}
+
+@function vars($var-name) {
+  $_: add-used-variable($var-name);
+
+  @return var(--#{$var-name});
+}
+
+@function get-used-variables() {
+  @return map.keys($used-variables);
+}
+
+/// ========================
+/// Breakpoints
+/// ========================
+
+/// Defines breakpoints for portrait and landscape orientations.
+/// These breakpoints are used to manage responsive layouts across devices.
+///
+/// The breakpoints are defined for both orientations (landscape and portrait) and consist of:
+/// - small, medium, large, etc. for various screen sizes
+/// - min-width and max-width in `px` converted to `rem` using the `px-to-rem` function.
+$breakpoints: (
+  landscape: (
+    small: (
+      min-width: 426px,
+      max-width: 767px,
+    ),
+    small-tablet: (
+      min-width: 768px,
+      max-width: 1023px,
+    ),
+    large-tablet: (
+      min-width: 1024px,
+      max-width: 1279px,
+    ),
+    laptop: (
+      min-width: 1280px,
+      max-width: 1439px,
+    ),
+    desktop: (
+      min-width: 1440px,
+      max-width: 1919px,
+    ),
+    wide-screen: (
+      min-width: 1920px,
+      max-width: 2560px,
+    ),
+  ),
+  portrait: (
+    small: (
+      min-width: 321px,
+      max-width: 375px,
+    ),
+    medium: (
+      min-width: 376px,
+      max-width: 425px,
+    ),
+    large: (
+      min-width: 426px,
+      max-width: 767px,
+    ),
+    small-tablet: (
+      min-width: 768px,
+      max-width: 1023px,
+    ),
+    large-tablet: (
+      min-width: 1024px,
+      max-width: 1279px,
+    ),
+    laptop: (
+      min-width: 1280px,
+      max-width: 1439px,
+    ),
+    desktop: (
+      min-width: 1440px,
+      max-width: 1919px,
+    ),
+    wide-screen: (
+      min-width: 1920px,
+      max-width: 2560px,
+    ),
+  ),
+) !default;
+
+/// ========================
+/// Container
+/// ========================
+
+/// Maximum widths for containers based on portrait and landscape orientations.
+/// Used to control adaptive sizes of main containers.
+///
+/// Each breakpoint contains a max-width value in `rem` to maintain flexibility across devices.
+$containers: (
+  landscape: (
+    small: 667px,
+    small-tablet: 1024px,
+    large-tablet: 1366px,
+    laptop: 1280px,
+    desktop: 1440px,
+    wide-screen: 1920px,
+  ),
+  portrait: (
+    small: 320px,
+    medium: 375px,
+    large: 414px,
+    small-tablet: 768px,
+    large-tablet: 1024px,
+    laptop: 1280px,
+    desktop: 1440px,
+    wide-screen: 1920px,
+  ),
+) !default;
+
+/// ========================
+/// Grids
+/// ========================
+
+/// Default grid
+///
+/// Defines the default number of cols for the grid system. A 12-column grid is commonly used in responsive design.
+$default-grid-columns: 1 !default;
+
+/// CSS grid configuration for each breakpoint.
+/// Defines the number of cols and gap sizes based on orientations and screen sizes.
+///
+/// Each breakpoint contains:
+/// - number of cols (e.g., 2, 3, 4, etc.)
+/// - gap size (spacing between cols) in `rem` units
+$grids: (
+  landscape: (
+    small: (
+      cols: 4,
+      gap: 16px,
+    ),
+    small-tablet: (
+      cols: 6,
+      gap: 24px,
+    ),
+    large-tablet: (
+      cols: 8,
+      gap: 32px,
+    ),
+    laptop: (
+      cols: 8,
+      gap: 32px,
+    ),
+    desktop: (
+      cols: 12,
+      gap: 32px,
+    ),
+    wide-screen: (
+      cols: 12,
+      gap: 32px,
+    ),
+  ),
+  portrait: (
+    small: (
+      cols: 2,
+      gap: 16px,
+    ),
+    medium: (
+      cols: 2,
+      gap: 16px,
+    ),
+    large: (
+      cols: 3,
+      gap: 16px,
+    ),
+    small-tablet: (
+      cols: 4,
+      gap: 24px,
+    ),
+    large-tablet: (
+      cols: 6,
+      gap: 32px,
+    ),
+    laptop: (
+      cols: 8,
+      gap: 32px,
+    ),
+    desktop: (
+      cols: 12,
+      gap: 32px,
+    ),
+    wide-screen: (
+      cols: 12,
+      gap: 32px,
+    ),
+  ),
+) !default;
+
+/// ========================
+/// Spacings
+/// ========================
+
+/// Defines common spacing values used throughout the design.
+/// These are typically applied for margins, paddings, gaps, and other spacing needs.
+///
+/// Values are stored as `rem` for consistent spacing across devices.
+/// The spacing values range from `0px` to larger values like `48px`.
+$spacings: (
+  0: 0px,
+  none: 0px,
+  1: 1px,
+  2: 2px,
+  4: 4px,
+  7: 7px,
+  8: 8px,
+  xs: 8px,
+  16: 16px,
+  sm: 16px,
+  20: 20px,
+  22: 22px,
+  24: 24px,
+  md: 24px,
+  32: 32px,
+  lg: 32px,
+  40: 40px,
+  48: 48px,
+  xl: 48px,
+) !default;
+
+/// ========================
+/// Typography
+/// ========================
+
+/// Default font-size
+///
+/// Defines the default font-size.
+$default-font-size: 16px !default;
+
+/// Font family map
+/// ========================
+/// Defines the font families used throughout the design for consistency.
+/// - `sans`: Sans-serif fonts
+/// - `mono`: Monospaced fonts
+$font-family: (
+  sans: "'Helvetica Neue', arial, sans-serif",
+  mono: "'Courier New', monospace",
+) !default;
+
+/// Font weight map
+/// ========================
+/// Defines the font weights for different text elements.
+/// - light: 300
+/// - base: 400
+/// - bold: 700
+$font-weight: (
+  thin: 100,
+  extra-light: 200,
+  ultra-light: 200,
+  light: 300,
+  normal: 400,
+  base: 400,
+  medium: 500,
+  semi-bold: 600,
+  demi-bold: 600,
+  bold: 700,
+  extra-bold: 800,
+  ultra-bold: 800,
+  "black": 900,
+  heavy: 900,
+) !default;
+
+/// Font size map
+/// ========================
+/// Defines the font sizes for various text elements in `rem` units.
+/// The base font size is `16px`, and other sizes are defined relative to it.
+$font-size: (
+  12: 12px,
+  14: 14px,
+  16: 16px,
+  base: 16px,
+  18: 18px,
+  medium: 18px,
+  20: 20px,
+  large: 20px,
+  22: 22px,
+  24: 24px,
+  26: 26px,
+  28: 28px,
+  32: 32px,
+  34: 34px,
+  36: 36px,
+  38: 38px,
+  40: 40px,
+  42: 42px,
+  44: 44px,
+  46: 46px,
+  48: 48px,
+  50: 50px,
+  52: 52px,
+  54: 54px,
+  56: 56px,
+  58: 58px,
+) !default;
+
+/// Fluid typography
+/// ========================
+/// Defines the font size that adapts fluidly to the screen size, enabling a scalable design across devices.
+/// Uses a `min()` and `max()` function to determine the font size based on the screen's width.
+
+// Pre-computed values to avoid deprecated Sass if() function (use @if/@else instead)
+$_ffs-14: 14;
+
+@if map.has-key($font-size, 14) {
+  $_ffs-14: map.get($font-size, 14);
+}
+
+$_ffs-16: 16;
+
+@if map.has-key($font-size, 16) {
+  $_ffs-16: map.get($font-size, 16);
+}
+
+$_ffs-base: 16px;
+
+@if map.has-key($font-size, base) {
+  $_ffs-base: map.get($font-size, base);
+}
+
+$_ffs-18: 18;
+
+@if map.has-key($font-size, 18) {
+  $_ffs-18: map.get($font-size, 18);
+}
+
+$_ffs-20: 20;
+
+@if map.has-key($font-size, 20) {
+  $_ffs-20: map.get($font-size, 20);
+}
+
+$_ffs-24: 24;
+
+@if map.has-key($font-size, 24) {
+  $_ffs-24: map.get($font-size, 24);
+}
+
+$_ffs-26: 26;
+
+@if map.has-key($font-size, 26) {
+  $_ffs-26: map.get($font-size, 26);
+}
+
+$_ffs-28: 28;
+
+@if map.has-key($font-size, 28) {
+  $_ffs-28: map.get($font-size, 28);
+}
+
+$_ffs-30: 30;
+
+@if map.has-key($font-size, 30) {
+  $_ffs-30: map.get($font-size, 30);
+}
+
+$_ffs-32: 32;
+
+@if map.has-key($font-size, 32) {
+  $_ffs-32: map.get($font-size, 32);
+}
+
+$_ffs-34: 34;
+
+@if map.has-key($font-size, 34) {
+  $_ffs-34: map.get($font-size, 34);
+}
+
+$font-size-fluid: (
+  sm: (
+    min: $_ffs-14,
+    fluid: 1.4vw,
+    max: $_ffs-base,
+  ),
+  base: (
+    min: $_ffs-base,
+    fluid: 1.6vw,
+    max: $_ffs-18,
+  ),
+  md: (
+    min: $_ffs-18,
+    fluid: 2vw,
+    max: $_ffs-20,
+  ),
+  lg: (
+    min: $_ffs-20,
+    fluid: 2.4vw,
+    max: $_ffs-24,
+  ),
+  xl: (
+    min: $_ffs-24,
+    fluid: 3vw,
+    max: $_ffs-26,
+  ),
+  h6: (
+    min: $_ffs-16,
+    fluid: 1.2vw,
+    max: $_ffs-20,
+  ),
+  h5: (
+    min: $_ffs-20,
+    fluid: 1.5vw,
+    max: $_ffs-24,
+  ),
+  h4: (
+    min: $_ffs-24,
+    fluid: 2vw,
+    max: $_ffs-28,
+  ),
+  h3: (
+    min: $_ffs-28,
+    fluid: 2.5vw,
+    max: $_ffs-30,
+  ),
+  h2: (
+    min: $_ffs-30,
+    fluid: 3vw,
+    max: $_ffs-32,
+  ),
+  h1: (
+    min: $_ffs-32,
+    fluid: 4vw,
+    max: $_ffs-34,
+  ),
+) !default;
+
+/// Line Heights
+/// ========================
+/// Defines line heights for various text elements. These are used to ensure appropriate vertical spacing between lines of text.
+$line-height: (
+  base: 1.2,
+  3: 1.3,
+  4: 1.4,
+  5: 1.5,
+  6: 1.6,
+  16: 16px,
+  large: 20px,
+) !default;
+
+/// Letter spacing
+/// ========================
+/// Defines letters spacing for various text elements.
+$letter-spacings: (
+  neg-one-half: -1.5px,
+  neg-one-fiftieth: -1.5px,
+  neg-one-fortieth: -1.4px,
+  neg-one-third: -1.33px,
+  neg-one-thirtieth: -1.3px,
+  neg-one-quarter: -1.25px,
+  neg-one-twentieth: -1.2px,
+  neg-one-tenth: -1.1px,
+  neg-one: -1px,
+  neg-ninetieth: -0.9px,
+  neg-eightieth: -0.8px,
+  neg-seventieth: -0.7px,
+  neg-two-thirds: -0.66px,
+  neg-sixtieth: -0.6px,
+  neg-half: -0.5px,
+  neg-fiftieth: -0.5px,
+  neg-fortieth: -0.4px,
+  neg-third: -0.33px,
+  neg-thirtieth: -0.3px,
+  neg-quarter: -0.25px,
+  neg-twentieth: -0.2px,
+  neg-tenth: -0.1px,
+  normal: 0px,
+  tenth: 0.1px,
+  twentieth: 0.2px,
+  quarter: 0.25px,
+  thirtieth: 0.3px,
+  third: 0.33px,
+  fortieth: 0.4px,
+  fiftieth: 0.5px,
+  half: 0.5px,
+  sixtieth: 0.6px,
+  two-thirds: 0.66px,
+  seventieth: 0.7px,
+  eightieth: 0.8px,
+  ninetieth: 0.9px,
+  one: 1px,
+  one-tenth: 1.1px,
+  one-twentieth: 1.2px,
+  one-quarter: 1.25px,
+  one-thirtieth: 1.3px,
+  one-third: 1.33px,
+  one-fortieth: 1.4px,
+  one-fiftieth: 1.5px,
+  one-half: 1.5px,
+  // Semantic aliases
+  tight: -0.5px,
+  wide: 0.5px,
+  wider: 1px,
+  widest: 1.5px,
+) !default;
+
+/// Headings Styles
+/// ========================
+/// Map defining styles for each heading level (h1 to h6).
+/// Includes margins, paddings, line height, font size, weight, and letter spacing.
+$headings: (
+  1: (
+    line-height: map.get($line-height, base),
+    margin: 0px 0px 16px 0px,
+    padding: 0px,
+    spacing: -1.5px,
+    weight: map.get($font-weight, light),
+  ),
+  2: (
+    line-height: map.get($line-height, 3),
+    margin: 0px 0px 12px 0px,
+    padding: 0px,
+    spacing: -0.5px,
+    weight: map.get($font-weight, light),
+  ),
+  3: (
+    line-height: map.get($line-height, 4),
+    margin: 0px 0px 8px 0px,
+    padding: 0px,
+    spacing: normal,
+    weight: map.get($font-weight, base),
+  ),
+  4: (
+    line-height: map.get($line-height, 5),
+    margin: 0px 0px 8px 0px,
+    padding: 0px,
+    spacing: 0.25px,
+    weight: map.get($font-weight, base),
+  ),
+  5: (
+    line-height: map.get($line-height, 6),
+    margin: 0px 0px 6px 0px,
+    padding: 0px,
+    spacing: normal,
+    weight: map.get($font-weight, base),
+  ),
+  6: (
+    line-height: map.get($line-height, 6),
+    margin: 0px 0px 6px 0px,
+    padding: 0px,
+    spacing: 0.25px,
+    weight: map.get($font-weight, bold),
+  ),
+) !default;
+
+/// ========================
+/// Shapes
+/// ========================
+/// Defines border radius for different elements to control their rounded corners.
+/// Can be defined in pixels or percentage for circular elements.
+$shape-radius: (
+  0: 0px,
+  none: 0px,
+  1: 4px,
+  extra-small: 4px,
+  extra-small-top: 4px 4px 0 0,
+  extra-small-end: 0 4px 4px 0,
+  extra-small-bottom: 0 0 4px 4px,
+  extra-small-start: 4px 0 0 4px,
+  2: 8px,
+  3: 10px,
+  medium: 12px,
+  medium-top: 12px 12px 0 0,
+  medium-end: 0 12px 12px 0,
+  medium-bottom: 0 0 12px 12px,
+  medium-start: 12px 0 0 12px,
+  4: 16px,
+  5: 22px,
+  large: 16px,
+  large-top: 16px 16px 0 0,
+  large-end: 0 16px 16px 0,
+  large-bottom: 0 0 16px 16px,
+  large-start: 16px 0 0 16px,
+  20: 20px,
+  20-top: 20px 20px 0 0,
+  20-end: 0 20px 20px 0,
+  20-bottom: 0 0 20px 20px,
+  20-start: 20px 0 0 20px,
+  6: 50%,
+  full: 50%,
+  full-top: 50% 50% 0 0,
+  full-end: 0 50% 50% 0,
+  full-bottom: 0 0 50% 50%,
+  full-start: 50% 0 0 50%,
+) !default;
+
+/// ========================
+/// Elevations
+/// ========================
+/// Defines different shadow elevations for various UI components.
+/// The `alpha` values control the transparency, and `size` defines the spread and blur of the shadow.
+$elevations: (
+  0: (
+    1: (
+      size: 0px 0px 0px 0px,
+      color: #000,
+      alpha: 0.2,
+    ),
+    2: (
+      size: 0px 0px 0px 0px,
+      color: #000,
+      alpha: 0.14,
+    ),
+    3: (
+      size: 0px 0px 0px 0px,
+      color: #000,
+      alpha: 0.12,
+    ),
+  ),
+  1: (
+    1: (
+      size: 0px 2px 1px -1px,
+      color: #000,
+      alpha: 0.2,
+    ),
+    2: (
+      size: 0px 1px 1px 0px,
+      color: #000,
+      alpha: 0.14,
+    ),
+    3: (
+      size: 0px 1px 3px 0px,
+      color: #000,
+      alpha: 0.12,
+    ),
+  ),
+  2: (
+    1: (
+      size: 0px 3px 3px -2px,
+      color: #000,
+      alpha: 0.2,
+    ),
+    2: (
+      size: 0px 3px 4px 0px,
+      color: #000,
+      alpha: 0.14,
+    ),
+    3: (
+      size: 0px 1px 8px 0px,
+      color: #000,
+      alpha: 0.12,
+    ),
+  ),
+  3: (
+    1: (
+      size: 0px 3px 5px -1px,
+      color: #000,
+      alpha: 0.2,
+    ),
+    2: (
+      size: 0px 6px 10px 0px,
+      color: #000,
+      alpha: 0.14,
+    ),
+    3: (
+      size: 0px 1px 18px 0px,
+      color: #000,
+      alpha: 0.12,
+    ),
+  ),
+  4: (
+    1: (
+      size: 0px 5px 5px -3px,
+      color: #000,
+      alpha: 0.2,
+    ),
+    2: (
+      size: 0px 8px 10px 1px,
+      color: #000,
+      alpha: 0.14,
+    ),
+    3: (
+      size: 0px 3px 14px 2px,
+      color: #000,
+      alpha: 0.12,
+    ),
+  ),
+  5: (
+    1: (
+      size: 0px 7px 8px -4px,
+      color: #000,
+      alpha: 0.2,
+    ),
+    2: (
+      size: 0px 12px 17px 2px,
+      color: #000,
+      alpha: 0.14,
+    ),
+    3: (
+      size: 0px 5px 22px 4px,
+      color: #000,
+      alpha: 0.12,
+    ),
+  ),
+) !default;
+
+/// ========================
+/// Colors
+/// ========================
+/// Maps or colors with declination, from the material design.
+$colors: (
+  red: (
+    lighten-5: #ffebee,
+    lighten-4: #ffcdd2,
+    lighten-3: #ef9a9a,
+    lighten-2: #e57373,
+    lighten-1: #ef5350,
+    default: #f44336,
+    darken-1: #e53935,
+    darken-2: #d32f2f,
+    darken-3: #c62828,
+    darken-4: #b71c1c,
+    accent-1: #ff8a80,
+    accent-2: #ff5252,
+    accent-3: #ff1744,
+    accent-4: #d50000,
+  ),
+  pink: (
+    lighten-5: #fce4ec,
+    lighten-4: #f8bbd0,
+    lighten-3: #f48fb1,
+    lighten-2: #f06292,
+    lighten-1: #ec407a,
+    default: #e91e63,
+    darken-1: #d81b60,
+    darken-2: #c2185b,
+    darken-3: #ad1457,
+    darken-4: #880e4f,
+    accent-1: #ff80ab,
+    accent-2: #ff4081,
+    accent-3: #f50057,
+    accent-4: #c51162,
+  ),
+  purple: (
+    lighten-5: #f3e5f5,
+    lighten-4: #e1bee7,
+    lighten-3: #ce93d8,
+    lighten-2: #ba68c8,
+    lighten-1: #ab47bc,
+    default: #9c27b0,
+    darken-1: #8e24aa,
+    darken-2: #7b1fa2,
+    darken-3: #6a1b9a,
+    darken-4: #4a148c,
+    accent-1: #ea80fc,
+    accent-2: #e040fb,
+    accent-3: #d500f9,
+    accent-4: #a0f,
+  ),
+  deep-purple: (
+    lighten-5: #ede7f6,
+    lighten-4: #d1c4e9,
+    lighten-3: #b39ddb,
+    lighten-2: #9575cd,
+    lighten-1: #7e57c2,
+    default: #673ab7,
+    darken-1: #5e35b1,
+    darken-2: #512da8,
+    darken-3: #4527a0,
+    darken-4: #311b92,
+    accent-1: #b388ff,
+    accent-2: #7c4dff,
+    accent-3: #651fff,
+    accent-4: #6200ea,
+  ),
+  indigo: (
+    lighten-5: #e8eaf6,
+    lighten-4: #c5cae9,
+    lighten-3: #9fa8da,
+    lighten-2: #7986cb,
+    lighten-1: #5c6bc0,
+    default: #3f51b5,
+    darken-1: #3949ab,
+    darken-2: #303f9f,
+    darken-3: #283593,
+    darken-4: #1a237e,
+    accent-1: #8c9eff,
+    accent-2: #536dfe,
+    accent-3: #3d5afe,
+    accent-4: #304ffe,
+  ),
+  blue: (
+    lighten-5: #e3f2fd,
+    lighten-4: #bbdefb,
+    lighten-3: #90caf9,
+    lighten-2: #64b5f6,
+    lighten-1: #42a5f5,
+    default: #2196f3,
+    darken-1: #1e88e5,
+    darken-2: #1976d2,
+    darken-3: #1565c0,
+    darken-4: #0d47a1,
+    accent-1: #82b1ff,
+    accent-2: #448aff,
+    accent-3: #2979ff,
+    accent-4: #2962ff,
+  ),
+  light-blue: (
+    lighten-5: #e1f5fe,
+    lighten-4: #b3e5fc,
+    lighten-3: #81d4fa,
+    lighten-2: #4fc3f7,
+    lighten-1: #29b6f6,
+    default: #03a9f4,
+    darken-1: #039be5,
+    darken-2: #0288d1,
+    darken-3: #0277bd,
+    darken-4: #01579b,
+    accent-1: #80d8ff,
+    accent-2: #40c4ff,
+    accent-3: #00b0ff,
+    accent-4: #0091ea,
+  ),
+  cyan: (
+    lighten-5: #e0f7fa,
+    lighten-4: #b2ebf2,
+    lighten-3: #80deea,
+    lighten-2: #4dd0e1,
+    lighten-1: #26c6da,
+    default: #00bcd4,
+    darken-1: #00acc1,
+    darken-2: #0097a7,
+    darken-3: #00838f,
+    darken-4: #006064,
+    accent-1: #84ffff,
+    accent-2: #18ffff,
+    accent-3: #00e5ff,
+    accent-4: #00b8d4,
+  ),
+  teal: (
+    lighten-5: #e0f2f1,
+    lighten-4: #b2dfdb,
+    lighten-3: #80cbc4,
+    lighten-2: #4db6ac,
+    lighten-1: #26a69a,
+    default: #009688,
+    darken-1: #00897b,
+    darken-2: #00796b,
+    darken-3: #00695c,
+    darken-4: #004d40,
+    accent-1: #a7ffeb,
+    accent-2: #64ffda,
+    accent-3: #1de9b6,
+    accent-4: #00bfa5,
+  ),
+  green: (
+    lighten-5: #e8f5e9,
+    lighten-4: #c8e6c9,
+    lighten-3: #a5d6a7,
+    lighten-2: #81c784,
+    lighten-1: #66bb6a,
+    default: #4caf50,
+    darken-1: #43a047,
+    darken-2: #388e3c,
+    darken-3: #2e7d32,
+    darken-4: #1b5e20,
+    accent-1: #b9f6ca,
+    accent-2: #69f0ae,
+    accent-3: #00e676,
+    accent-4: #00c853,
+  ),
+  light-green: (
+    lighten-5: #f1f8e9,
+    lighten-4: #dcedc8,
+    lighten-3: #c5e1a5,
+    lighten-2: #aed581,
+    lighten-1: #9ccc65,
+    default: #8bc34a,
+    darken-1: #7cb342,
+    darken-2: #689f38,
+    darken-3: #558b2f,
+    darken-4: #33691e,
+    accent-1: #ccff90,
+    accent-2: #b2ff59,
+    accent-3: #76ff03,
+    accent-4: #64dd17,
+  ),
+  lime: (
+    lighten-5: #f9fbe7,
+    lighten-4: #f0f4c3,
+    lighten-3: #e6ee9c,
+    lighten-2: #dce775,
+    lighten-1: #d4e157,
+    default: #cddc39,
+    darken-1: #c0ca33,
+    darken-2: #afb42b,
+    darken-3: #9e9d24,
+    darken-4: #827717,
+    accent-1: #f4ff81,
+    accent-2: #eeff41,
+    accent-3: #c6ff00,
+    accent-4: #aeea00,
+  ),
+  yellow: (
+    lighten-5: #fffde7,
+    lighten-4: #fff9c4,
+    lighten-3: #fff59d,
+    lighten-2: #fff176,
+    lighten-1: #ffee58,
+    default: #ffeb3b,
+    darken-1: #fdd835,
+    darken-2: #fbc02d,
+    darken-3: #f9a825,
+    darken-4: #f57f17,
+    accent-1: #ffff8d,
+    accent-2: #ff0,
+    accent-3: #ffea00,
+    accent-4: #ffd600,
+  ),
+  amber: (
+    lighten-5: #fff8e1,
+    lighten-4: #ffecb3,
+    lighten-3: #ffe082,
+    lighten-2: #ffd54f,
+    lighten-1: #ffca28,
+    default: #ffc107,
+    darken-1: #ffb300,
+    darken-2: #ffa000,
+    darken-3: #ff8f00,
+    darken-4: #ff6f00,
+    accent-1: #ffe57f,
+    accent-2: #ffd740,
+    accent-3: #ffc400,
+    accent-4: #ffab00,
+  ),
+  orange: (
+    lighten-5: #fff3e0,
+    lighten-4: #ffe0b2,
+    lighten-3: #ffcc80,
+    lighten-2: #ffb74d,
+    lighten-1: #ffa726,
+    default: #ff9800,
+    darken-1: #fb8c00,
+    darken-2: #f57c00,
+    darken-3: #ef6c00,
+    darken-4: #e65100,
+    accent-1: #ffd180,
+    accent-2: #ffab40,
+    accent-3: #ff9100,
+    accent-4: #ff6d00,
+  ),
+  deep-orange: (
+    lighten-5: #fbe9e7,
+    lighten-4: #ffccbc,
+    lighten-3: #ffab91,
+    lighten-2: #ff8a65,
+    lighten-1: #ff7043,
+    default: #ff5722,
+    darken-1: #f4511e,
+    darken-2: #e64a19,
+    darken-3: #d84315,
+    darken-4: #bf360c,
+    accent-1: #ff9e80,
+    accent-2: #ff6e40,
+    accent-3: #ff3d00,
+    accent-4: #dd2c00,
+  ),
+  brown: (
+    lighten-5: #efebe9,
+    lighten-4: #d7ccc8,
+    lighten-3: #bcaaa4,
+    lighten-2: #a1887f,
+    lighten-1: #8d6e63,
+    default: #795548,
+    darken-1: #6d4c41,
+    darken-2: #5d4037,
+    darken-3: #4e342e,
+    darken-4: #3e2723,
+  ),
+  grey: (
+    lighten-5: #fafafa,
+    lighten-4: #f5f5f5,
+    lighten-3: #eee,
+    lighten-2: #e0e0e0,
+    lighten-1: #bdbdbd,
+    default: #9e9e9e,
+    darken-1: #757575,
+    darken-2: #616161,
+    darken-3: #424242,
+    darken-4: #212121,
+  ),
+  blue-grey: (
+    lighten-5: #eceff1,
+    lighten-4: #cfd8dc,
+    lighten-3: #b0bec5,
+    lighten-2: #90a4ae,
+    lighten-1: #78909c,
+    default: #607d8b,
+    darken-1: #546e7a,
+    darken-2: #455a64,
+    darken-3: #37474f,
+    darken-4: #263238,
+  ),
+  black: (
+    default: #000,
+  ),
+  white: (
+    default: #fff,
+  ),
+);
+
+/// ========================
+/// States
+/// ========================
+$states: (
+  state-hover-state-layer-opacity: 0.08,
+  state-hover-state-layer-opacity-forced: 0.2,
+  state-focus-state-layer-opacity: 0.1,
+  state-pressed-state-layer-opacity: 0.1,
+  state-disabled-opacity: 0.38,
+  state-disabled-outline-opacity: 0.12,
+  state-disabled-container-opacity: 0.04,
+);
+$opacity: (
+  disabled: 0.38,
+);
+
+/// ========================
+/// Theme — Semantic color tokens
+/// ========================
+/// Default semantic token → Material palette mapping.
+/// Override before @use to change individual tokens, or pass overrides to mx.generate-theme().
+///
+/// Example override:
+///   @use "@zairakai/mithril-scss/src/variables" with (
+///     $theme: map.merge(variables.$theme, (primary: #ff5722, on-primary: #fff))
+///   );
+$theme: (
+  primary: map.get(map.get($colors, blue-grey), darken-2),
+  // #455a64
+  primary-variant: map.get(map.get($colors, blue-grey), darken-4),
+  // #263238
+  on-primary: map.get(map.get($colors, white), default),
+  // #fff
+  secondary: map.get(map.get($colors, blue-grey), default),
+  // #607d8b
+  secondary-variant: map.get(map.get($colors, blue-grey), darken-1),
+  // #546e7a
+  on-secondary: map.get(map.get($colors, white), default),
+  // #fff
+  surface: map.get(map.get($colors, white), default),
+  // #fff
+  on-surface: map.get(map.get($colors, grey), darken-4),
+  // #212121
+  background: map.get(map.get($colors, grey), lighten-5),
+  // #fafafa
+  on-background: map.get(map.get($colors, grey), darken-4),
+  // #212121
+  error: map.get(map.get($colors, red), default),
+  // #f44336
+  on-error: map.get(map.get($colors, white), default), // #fff
+) !default;

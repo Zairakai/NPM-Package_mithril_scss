@@ -1,0 +1,18 @@
+/// Main entry point for the Sylvershare framework styles.
+/// This file consolidates all partials, ensuring they are bundled
+/// together for easy inclusion in external projects.
+///
+/// Modules included:
+/// - Variables: Core design tokens such as colors, fonts, and sizes.
+/// - Functions: Helper functions to perform common calculations or logic.
+/// - Mixins: Reusable style patterns for consistent code.
+/// - Placeholders: `%placeholders` for extending shared styles.
+/// - Grid: `%placeholders` for responsive grid layout utilities.
+/// - Spacing: `%placeholders` for margin and padding control.
+
+@forward "functions"; /// Sass functions used across the framework.
+@forward "mixins"; /// Reusable style mixins for consistent styling.
+@forward "variables"; /// Design tokens like colors, fonts, and sizes.
+@forward "grid"; /// `%placeholders` for responsive grid utilities.
+@forward "spacing"; /// `%placeholders` for spacing (margins and padding).
+@forward "placeholders"; /// `%placeholders` for shared style extensions.
