@@ -4,7 +4,6 @@
  */
 export default {
   project: ['tests/**/*.js'],
-  ignore: ['**/*.scss'],
   ignoreBinaries: ['make'],
   ignoreDependencies: ['sort-package-json'],
 }
