@@ -1,0 +1,201 @@
+@use "shared";
+
+.alert,
+.banner {
+  display: flex;
+  gap: var(--zk-space-2);
+  align-items: flex-start;
+  padding: var(--zk-space-2) var(--zk-space-3);
+  color: var(--on-surface);
+  background: var(--surface);
+  border: 1px solid var(--zk-border);
+  border-inline-start: 4px solid var(--zk-info);
+  border-radius: var(--zk-radius);
+
+  @include shared.variants;
+
+  &-content,
+  &-body {
+    flex: 1;
+  }
+
+  &-title {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &-close,
+  &-dismiss {
+    @include shared.ghost-button;
+  }
+}
+
+.banner {
+  border-radius: 0;
+}
+
+.cookie-banner {
+  @include shared.surface(3);
+
+  position: fixed;
+  inset-block-end: var(--zk-space-3);
+  inset-inline: var(--zk-space-3);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zk-space-2);
+  max-inline-size: 40rem;
+  padding: var(--zk-space-3);
+  margin-inline: auto;
+
+  &-title {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--zk-space-2);
+  }
+
+  &-accept,
+  &-save {
+    @include shared.ghost-button;
+
+    color: var(--on-primary);
+    background: var(--primary);
+
+    &:hover:not(:disabled) {
+      background: var(--primary-variant);
+    }
+  }
+
+  &-reject,
+  &-customize {
+    @include shared.ghost-button;
+
+    border: 1px solid var(--zk-border-strong);
+  }
+
+  &-categories {
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-radius);
+  }
+
+  &-description {
+    margin: 0;
+    font-size: 0.875em;
+    color: var(--zk-muted);
+  }
+}
+
+.progress {
+  display: block;
+  inline-size: 100%;
+  block-size: 0.5rem;
+  overflow: hidden;
+  appearance: none;
+  background: var(--zk-pressed);
+  border: 0;
+  border-radius: 999px;
+
+  &::-webkit-progress-bar {
+    background: var(--zk-pressed);
+  }
+
+  &::-webkit-progress-value {
+    background: var(--primary);
+    transition: inline-size var(--zk-duration);
+  }
+
+  &::-moz-progress-bar {
+    background: var(--primary);
+  }
+
+  &-track {
+    overflow: hidden;
+    background: var(--zk-pressed);
+    border-radius: 999px;
+  }
+
+  &-bar {
+    block-size: 100%;
+    background: var(--primary);
+    transition: inline-size var(--zk-duration);
+  }
+}
+
+.skeleton {
+  display: block;
+  min-block-size: 1em;
+  background: linear-gradient(90deg, var(--zk-hover) 25%, var(--zk-pressed) 37%, var(--zk-hover) 63%);
+  background-size: 400% 100%;
+  border-radius: var(--zk-radius);
+  animation: zk-skeleton 1.4s ease infinite;
+
+  &-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--zk-space-2);
+  }
+}
+
+@keyframes zk-skeleton {
+  from {
+    background-position: 100% 50%;
+  }
+
+  to {
+    background-position: 0 50%;
+  }
+}
+
+.toast-container {
+  inset: auto var(--zk-space-3) var(--zk-space-3) auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zk-space-2);
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+}
+
+.toast {
+  @include shared.surface(2);
+
+  display: flex;
+  gap: var(--zk-space-2);
+  align-items: flex-start;
+  min-inline-size: 16rem;
+  padding: var(--zk-space-2) var(--zk-space-3);
+  border-inline-start: 4px solid var(--zk-info);
+
+  @include shared.variants;
+
+  &-title {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &-message {
+    flex: 1;
+  }
+
+  &-close {
+    @include shared.ghost-button;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+
+  .progress-bar,
+  .progress::-webkit-progress-value {
+    transition: none;
+  }
+}

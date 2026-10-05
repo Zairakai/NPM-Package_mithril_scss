@@ -1,0 +1,95 @@
+@use "sass:map";
+@use "../mixins" as mx;
+@use "../variables" as vars;
+@use "../functions" as fn;
+
+/// The look of the opt-in component styles is made of CSS custom properties.
+/// Light is the default, dark follows `data-theme="dark"` (what the theme
+/// switcher of `@zairakai/vue-components` writes) or the preference of the
+/// system when `data-theme` is not `light`.
+
+/// The semantic tokens of the dark mode. Override them with `@use ... with (...)`.
+$dark-theme: (
+  primary: map.get(map.get(vars.$colors, blue-grey), lighten-2),
+  primary-variant: map.get(map.get(vars.$colors, blue-grey), lighten-3),
+  on-primary: map.get(map.get(vars.$colors, grey), darken-4),
+  secondary: map.get(map.get(vars.$colors, blue-grey), lighten-3),
+  secondary-variant: map.get(map.get(vars.$colors, blue-grey), lighten-4),
+  on-secondary: map.get(map.get(vars.$colors, grey), darken-4),
+  surface: #1e1e1e,
+  on-surface: map.get(map.get(vars.$colors, grey), lighten-3),
+  background: #121212,
+  on-background: map.get(map.get(vars.$colors, grey), lighten-3),
+  error: map.get(map.get(vars.$colors, red), lighten-2),
+  on-error: map.get(map.get(vars.$colors, grey), darken-4),
+) !default;
+
+/// Emit the tokens (set to false if the application already writes them).
+$emit-tokens: true !default;
+
+@mixin -component-tokens($dark: false) {
+  $alpha-1: 0.18;
+  $alpha-2: 0.2;
+  $alpha-3: 0.24;
+
+  @if $dark {
+    $alpha-1: 0.6;
+    $alpha-2: 0.6;
+    $alpha-3: 0.7;
+  }
+
+  --zk-border: rgb(var(--on-surface-rgb) / 18%);
+  --zk-border-strong: rgb(var(--on-surface-rgb) / 38%);
+  --zk-muted: rgb(var(--on-surface-rgb) / 62%);
+  --zk-hover: rgb(var(--on-surface-rgb) / 6%);
+  --zk-pressed: rgb(var(--on-surface-rgb) / 12%);
+  --zk-focus: var(--primary);
+  --zk-scrim: rgb(0 0 0 / 50%);
+  --zk-shadow-1: 0 1px 3px rgb(0 0 0 / #{$alpha-1});
+  --zk-shadow-2: 0 4px 12px rgb(0 0 0 / #{$alpha-2});
+  --zk-shadow-3: 0 12px 32px rgb(0 0 0 / #{$alpha-3});
+}
+
+@if $emit-tokens {
+  :root {
+    @include mx.generate-theme;
+    @include -component-tokens;
+
+    --zk-success: #{fn.get-color(green, darken-2)};
+    --zk-warning: #{fn.get-color(orange, darken-2)};
+    --zk-info: #{fn.get-color(blue, darken-2)};
+    --zk-radius: #{map.get(vars.$shape-radius, 2)};
+    --zk-radius-lg: #{map.get(vars.$shape-radius, medium)};
+    --zk-space-1: #{fn.get-spacing(4, true)};
+    --zk-space-2: #{fn.get-spacing(8, true)};
+    --zk-space-3: #{fn.get-spacing(16, true)};
+    --zk-space-4: #{fn.get-spacing(20, true)};
+    --zk-duration: 150ms;
+
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    @include mx.generate-theme($dark-theme);
+    @include -component-tokens(true);
+
+    --zk-success: #{fn.get-color(green, lighten-1)};
+    --zk-warning: #{fn.get-color(orange, lighten-1)};
+    --zk-info: #{fn.get-color(blue, lighten-1)};
+
+    color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      @include mx.generate-theme($dark-theme);
+      @include -component-tokens(true);
+
+      --zk-success: #{fn.get-color(green, lighten-1)};
+      --zk-warning: #{fn.get-color(orange, lighten-1)};
+      --zk-info: #{fn.get-color(blue, lighten-1)};
+
+      color-scheme: dark;
+    }
+  }
+}

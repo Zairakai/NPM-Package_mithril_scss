@@ -1,0 +1,86 @@
+/// Shared pieces of the component styles.
+
+@mixin focus-ring {
+  outline: 2px solid var(--zk-focus);
+  outline-offset: 2px;
+}
+
+/// A surface: the base of cards, panels, menus and dialogs.
+@mixin surface($shadow: 1) {
+  color: var(--on-surface);
+  background: var(--surface);
+  border: 1px solid var(--zk-border);
+  border-radius: var(--zk-radius-lg);
+  box-shadow: var(--zk-shadow-#{$shadow});
+}
+
+/// A plain button that only has a hover and a pressed state.
+@mixin ghost-button {
+  padding: var(--zk-space-1) var(--zk-space-2);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--zk-radius);
+
+  &:hover:not(:disabled, [aria-disabled="true"]) {
+    background: var(--zk-hover);
+  }
+
+  &:active:not(:disabled, [aria-disabled="true"]) {
+    background: var(--zk-pressed);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.38;
+  }
+}
+
+/// The color of a status, from `data-variant`.
+@mixin variants($property: border-color) {
+  &[data-variant="info"] {
+    #{$property}: var(--zk-info);
+  }
+
+  &[data-variant="success"] {
+    #{$property}: var(--zk-success);
+  }
+
+  &[data-variant="warning"] {
+    #{$property}: var(--zk-warning);
+  }
+
+  &[data-variant="error"] {
+    #{$property}: var(--error);
+  }
+}
+
+@mixin field {
+  padding: var(--zk-space-1) var(--zk-space-2);
+  font: inherit;
+  color: var(--on-surface);
+  background: var(--surface);
+  border: 1px solid var(--zk-border-strong);
+  border-radius: var(--zk-radius);
+
+  &:focus-visible {
+    border-color: var(--zk-focus);
+    outline: 2px solid var(--zk-focus);
+    outline-offset: 0;
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+
+  &[aria-invalid="true"] {
+    border-color: var(--error);
+  }
+}

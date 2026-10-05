@@ -1,0 +1,41 @@
+@use "shared";
+
+.theme-switcher {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--zk-border-strong);
+  border-radius: var(--zk-radius);
+
+  &-option {
+    @include shared.ghost-button;
+
+    border-radius: 0;
+
+    &[aria-pressed="true"] {
+      color: var(--on-primary);
+      background: var(--primary);
+    }
+  }
+}
+
+.share-button {
+  @include shared.ghost-button;
+
+  border: 1px solid var(--zk-border-strong);
+
+  &-status {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+.countdown {
+  font-variant-numeric: tabular-nums;
+
+  &-part + &-part {
+    margin-inline-start: var(--zk-space-1);
+  }
+}

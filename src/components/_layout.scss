@@ -1,0 +1,96 @@
+@use "shared";
+
+.app-bar {
+  display: flex;
+  gap: var(--zk-space-3);
+  align-items: center;
+  min-block-size: 3.5rem;
+  padding-inline: var(--zk-space-3);
+  color: var(--on-primary);
+  background: var(--primary);
+  box-shadow: var(--zk-shadow-1);
+
+  &[data-dense] {
+    min-block-size: 2.5rem;
+  }
+
+  &[data-sticky] {
+    z-index: 100;
+  }
+
+  &-title {
+    flex: 1;
+    font-size: 1.125em;
+    font-weight: 600;
+  }
+
+  &-leading,
+  &-trailing {
+    display: flex;
+    gap: var(--zk-space-2);
+    align-items: center;
+  }
+}
+
+.bottom-navigation {
+  display: flex;
+  justify-content: space-around;
+  background: var(--surface);
+  border-top: 1px solid var(--zk-border);
+
+  &-item {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--zk-space-1);
+    align-items: center;
+    padding: var(--zk-space-2);
+    font: inherit;
+    color: var(--zk-muted);
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+
+    &[aria-current="page"] {
+      color: var(--primary);
+    }
+
+    &:focus-visible {
+      @include shared.focus-ring;
+
+      outline-offset: -2px;
+    }
+  }
+
+  &-label {
+    font-size: 0.75em;
+  }
+}
+
+.splitter {
+  &-handle {
+    background: var(--zk-border);
+    transition: background var(--zk-duration);
+
+    &:hover,
+    &:focus-visible,
+    [data-dragging] > & {
+      background: var(--primary);
+    }
+  }
+
+  &[data-direction="horizontal"] > &-handle {
+    inline-size: 6px;
+  }
+
+  &[data-direction="vertical"] > &-handle {
+    block-size: 6px;
+  }
+
+  &-pane {
+    min-inline-size: 0;
+    min-block-size: 0;
+    overflow: auto;
+  }
+}

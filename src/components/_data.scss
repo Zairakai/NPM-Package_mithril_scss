@@ -1,0 +1,157 @@
+@use "shared";
+
+.data-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zk-space-3);
+}
+
+.data-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+
+  caption {
+    padding: var(--zk-space-2);
+    font-weight: 600;
+    text-align: start;
+  }
+
+  th,
+  td {
+    padding: var(--zk-space-2) var(--zk-space-3);
+    text-align: start;
+    border-bottom: 1px solid var(--zk-border);
+
+    &[data-align="end"] {
+      text-align: end;
+    }
+
+    &[data-align="center"] {
+      text-align: center;
+    }
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--zk-muted);
+  }
+
+  tbody tr:hover {
+    background: var(--zk-hover);
+  }
+
+  tbody tr[aria-selected="true"] {
+    background: var(--zk-pressed);
+  }
+
+  &[data-loading] {
+    opacity: 0.6;
+  }
+
+  &-sort {
+    @include shared.ghost-button;
+
+    font-weight: inherit;
+
+    &::after {
+      margin-inline-start: var(--zk-space-1);
+      content: "↕";
+      opacity: 0.4;
+    }
+  }
+
+  th[aria-sort="ascending"] &-sort::after {
+    content: "↑";
+    opacity: 1;
+  }
+
+  th[aria-sort="descending"] &-sort::after {
+    content: "↓";
+    opacity: 1;
+  }
+
+  &-empty td {
+    padding: var(--zk-space-4);
+    color: var(--zk-muted);
+    text-align: center;
+  }
+
+  &-search form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--zk-space-3);
+    align-items: flex-end;
+  }
+
+  &-filter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--zk-space-1);
+  }
+
+  &-search input,
+  &-search select {
+    @include shared.field;
+  }
+
+  &-range {
+    display: flex;
+    gap: var(--zk-space-1);
+  }
+
+  &-clear {
+    @include shared.ghost-button;
+
+    border: 1px solid var(--zk-border-strong);
+  }
+}
+
+.sortable {
+  &-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &-item {
+    display: flex;
+    gap: var(--zk-space-2);
+    align-items: center;
+    padding: var(--zk-space-2);
+    background: var(--surface);
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-radius);
+
+    &[data-grabbed],
+    &[data-dragging] {
+      box-shadow: var(--zk-shadow-2);
+      opacity: 0.85;
+    }
+  }
+
+  &-handle {
+    @include shared.ghost-button;
+
+    cursor: grab;
+    touch-action: none;
+  }
+
+  &-status {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+.sortable-item + .sortable-item {
+  margin-block-start: var(--zk-space-1);
+}
+
+.infinite-scroll-loading,
+.infinite-scroll-finished {
+  padding: var(--zk-space-3);
+  color: var(--zk-muted);
+  text-align: center;
+}
