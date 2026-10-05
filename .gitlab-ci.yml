@@ -9,3 +9,26 @@ include:
 variables:
   CACHE_KEY: "mithril-scss-v1"
   NPM_PACKAGE_NAME: "@zairakai/mithril-scss"
+
+# The documentation site, published with GitLab Pages from main.
+# The reference is generated from the SassDoc comments of the source, so it cannot drift from the code.
+pages:
+  stage: build
+  image: ${NODE_IMAGE}
+  needs: []
+  before_script:
+    - node --version
+  script:
+    - cd docs
+    - npm ci --no-audit --no-fund
+    - npm run build
+    - mv .vitepress/dist ../public
+  # The next jobs of the runner must not find (and lint) the docs dependencies.
+  after_script:
+    - rm -rf docs/node_modules docs/reference docs/.vitepress/dist docs/.vitepress/cache
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
