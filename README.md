@@ -13,6 +13,8 @@
 
 Mithril is a lightweight and indestructible modular SCSS framework for building responsive layouts with a clean grid system.
 
+**Documentation: <https://mithril-scss-29f2e5.gitlab.io>**
+
 ---
 
 ## Install
@@ -63,7 +65,7 @@ The look is made of CSS custom properties (`--primary`, `--surface`, `--zk-borde
 
 ## Documentation
 
-The documentation site has the guides and a reference of the functions, mixins, variables and placeholders, generated from the SassDoc comments of the source. Build it with `cd docs && npm ci && npm run dev`. It is published with GitLab Pages from `main`.
+The [documentation site](https://mithril-scss-29f2e5.gitlab.io) has the guides and a reference of the functions, mixins, variables and placeholders, generated from the SassDoc comments of the source. Build it with `cd docs && npm ci && npm run dev`. It is published with GitLab Pages from `main`.
 
 ---
 
