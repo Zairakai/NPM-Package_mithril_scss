@@ -1,0 +1,21 @@
+/// Opt-in styles for the class hooks and state attributes of @zairakai/vue-components.
+/// Light and dark modes included. It outputs CSS: @use it once, where you want the styles.
+///
+///   @use "@zairakai/mithril-scss/components";
+///
+/// Change the dark palette or turn the tokens off:
+///
+///   @use "@zairakai/mithril-scss/components" with ($dark-theme: (...), $emit-tokens: false);
+
+@forward "tokens";
+@use "tokens";
+@use "display";
+@use "feedback";
+@use "navigation";
+@use "overlay";
+@use "data";
+@use "content";
+@use "layout";
+@use "media";
+@use "form";
+@use "utility";

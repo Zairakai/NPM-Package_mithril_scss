@@ -43,7 +43,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.scss",
-    "./bases/*.scss": "./src/bases/*.scss"
+    "./bases/*.scss": "./src/bases/*.scss",
+    "./components": "./src/components/index.scss"
   },
   "files": [
     "src"

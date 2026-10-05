@@ -48,6 +48,23 @@ Opt-in base stylesheets (not included in `index.scss`):
 @use "@zairakai/mithril-scss/bases/reset.scss";
 ```
 
+### Styles for `@zairakai/vue-components`
+
+An opt-in stylesheet styles the class hooks and the state attributes of the components, with the tokens of the framework, light and dark modes included (`data-theme` or the preference of the system):
+
+```scss
+@use "@zairakai/mithril-scss/components";
+
+// Change the dark palette, or leave the tokens to the application:
+@use "@zairakai/mithril-scss/components" with ($dark-theme: (...), $emit-tokens: false);
+```
+
+The look is made of CSS custom properties (`--primary`, `--surface`, `--zk-border`, `--zk-radius`…): change them on `:root` or on any element.
+
+## Documentation
+
+The documentation site has the guides and a reference of the functions, mixins, variables and placeholders, generated from the SassDoc comments of the source. Build it with `cd docs && npm ci && npm run dev`. It is published with GitLab Pages from `main`.
+
 ---
 
 ## Variables
