@@ -1,0 +1,105 @@
+@use "shared";
+
+.modal {
+  @include shared.surface(3);
+
+  inline-size: min(32rem, calc(100vw - 2rem));
+  padding: 0;
+
+  &::backdrop {
+    background: var(--zk-scrim);
+  }
+
+  &:not(dialog) {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    block-size: fit-content;
+    margin: auto;
+  }
+
+  &-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--zk-space-3);
+    border-bottom: 1px solid var(--zk-border);
+  }
+
+  &-title {
+    margin: 0;
+    font-size: 1.125em;
+  }
+
+  &-body,
+  &-content {
+    padding: var(--zk-space-3);
+  }
+
+  &-footer {
+    display: flex;
+    gap: var(--zk-space-2);
+    justify-content: flex-end;
+    padding: var(--zk-space-3);
+    border-top: 1px solid var(--zk-border);
+  }
+
+  &-close {
+    @include shared.ghost-button;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  gap: var(--zk-space-2);
+  justify-content: flex-end;
+  margin-block-start: var(--zk-space-3);
+}
+
+.drawer {
+  @include shared.surface(3);
+
+  padding: var(--zk-space-3);
+
+  &::backdrop {
+    background: var(--zk-scrim);
+  }
+}
+
+.popover,
+.dropdown-menu,
+.context-menu,
+.tooltip {
+  @include shared.surface(2);
+
+  padding: var(--zk-space-2);
+}
+
+.tooltip {
+  padding: var(--zk-space-1) var(--zk-space-2);
+  font-size: 0.8125em;
+  color: var(--surface);
+  background: var(--on-surface);
+  border-color: transparent;
+}
+
+.dropdown-menu,
+.context-menu {
+  min-inline-size: 10rem;
+  padding: var(--zk-space-1);
+}
+
+.dropdown-item,
+.context-menu [role="menuitem"] {
+  @include shared.ghost-button;
+
+  display: block;
+  inline-size: 100%;
+  text-align: start;
+}
+
+.dropdown-item:focus,
+.context-menu [role="menuitem"]:focus {
+  background: var(--zk-pressed);
+  outline: none;
+}

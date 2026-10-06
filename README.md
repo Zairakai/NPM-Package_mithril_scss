@@ -4,6 +4,7 @@
 [![Develop][pipeline-develop-badge]][pipeline-develop-link]
 
 [![npm][npm-badge]][npm-link]
+[![Docs][docs-badge]][docs]
 [![GitLab Release][gitlab-release-badge]][gitlab-release]
 [![License][license-badge]][license]
 
@@ -12,6 +13,8 @@
 [![Prettier][prettier-badge]][prettier]
 
 Mithril is a lightweight and indestructible modular SCSS framework for building responsive layouts with a clean grid system.
+
+**Documentation: [mithril-scss-29f2e5.gitlab.io][docs]**
 
 ---
 
@@ -47,6 +50,25 @@ Opt-in base stylesheets (not included in `index.scss`):
 ```scss
 @use "@zairakai/mithril-scss/bases/reset.scss";
 ```
+
+### Styles for `@zairakai/vue-components`
+
+An opt-in stylesheet styles the class hooks and the state attributes of the components, with the tokens of the framework, light and dark modes included (`data-theme` or the preference of the system):
+
+```scss
+@use "@zairakai/mithril-scss/components";
+
+// Change the dark palette, or leave the tokens to the application:
+@use "@zairakai/mithril-scss/components" with ($dark-theme: (...), $emit-tokens: false);
+```
+
+To use it inside a part of a page only, give it a scope: `@use "@zairakai/mithril-scss/components" with ($scope: ".demo");`.
+
+The look is made of CSS custom properties (`--primary`, `--surface`, `--zk-border`, `--zk-radius`…): change them on `:root` or on any element.
+
+## Documentation
+
+The [documentation site][docs] has the guides and a reference of the functions, mixins, variables and placeholders, generated from the SassDoc comments of the source. Build it with `cd docs && npm ci && npm run dev`. It is published with GitLab Pages from `main`, with the documentation of every released version (selector at the top right, `next` is `main`) and a gallery of the component styles.
 
 ---
 
@@ -936,3 +958,5 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development workflow.
 [prettier-badge]: https://img.shields.io/badge/formatter-prettier-F7B93E.svg?logo=prettier
 [prettier]: https://prettier.io
 [ecosystem]: https://gitlab.com/zairakai
+[docs]: https://mithril-scss-29f2e5.gitlab.io
+[docs-badge]: https://img.shields.io/badge/docs-online-blue

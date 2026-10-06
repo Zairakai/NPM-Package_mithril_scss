@@ -1,0 +1,35 @@
+@use "sass:meta";
+
+/// Opt-in styles for the class hooks and state attributes of @zairakai/vue-components.
+/// Light and dark modes included. It outputs CSS: @use it once, where you want the styles.
+///
+///   @use "@zairakai/mithril-scss/components";
+///
+/// Change the dark palette, turn the tokens off, or limit it to an element:
+///
+///   @use "@zairakai/mithril-scss/components" with ($dark-theme: (...), $emit-tokens: false);
+///   @use "@zairakai/mithril-scss/components" with ($scope: ".demo");
+
+@forward "tokens";
+@use "tokens";
+
+@mixin -styles {
+  @include meta.load-css("display");
+  @include meta.load-css("feedback");
+  @include meta.load-css("navigation");
+  @include meta.load-css("overlay");
+  @include meta.load-css("data");
+  @include meta.load-css("content");
+  @include meta.load-css("layout");
+  @include meta.load-css("media");
+  @include meta.load-css("form");
+  @include meta.load-css("utility");
+}
+
+@if tokens.$scope {
+  #{tokens.$scope} {
+    @include -styles;
+  }
+} @else {
+  @include -styles;
+}

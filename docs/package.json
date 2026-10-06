@@ -1,0 +1,15 @@
+{
+  "name": "mithril-scss-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "dev": "npm run generate && vitepress dev",
+    "build": "npm run generate && vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "sass": "^1.99.0",
+    "vitepress": "1.6.4"
+  }
+}
