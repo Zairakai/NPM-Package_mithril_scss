@@ -44,6 +44,14 @@ The look is made of CSS custom properties. Change them on `:root`, or on any ele
 );
 ```
 
+## Limit it to a part of a page
+
+To use the stylesheet inside an element only (a documentation site that has its own classes, a widget, a micro-frontend), give it a scope. Every rule is written under the selector, and the tokens (light and dark) are written on it:
+
+```scss
+@use "@zairakai/mithril-scss/components" with ($scope: ".demo");
+```
+
 ## Use it with the theme switcher
 
 ```vue
