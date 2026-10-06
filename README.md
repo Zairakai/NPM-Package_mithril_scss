@@ -4,6 +4,7 @@
 [![Develop][pipeline-develop-badge]][pipeline-develop-link]
 
 [![npm][npm-badge]][npm-link]
+[![Docs][docs-badge]][docs]
 [![GitLab Release][gitlab-release-badge]][gitlab-release]
 [![License][license-badge]][license]
 
@@ -13,7 +14,7 @@
 
 Mithril is a lightweight and indestructible modular SCSS framework for building responsive layouts with a clean grid system.
 
-**Documentation: <https://mithril-scss-29f2e5.gitlab.io>**
+**Documentation: [mithril-scss-29f2e5.gitlab.io][docs]**
 
 ---
 
@@ -67,7 +68,7 @@ The look is made of CSS custom properties (`--primary`, `--surface`, `--zk-borde
 
 ## Documentation
 
-The [documentation site](https://mithril-scss-29f2e5.gitlab.io) has the guides and a reference of the functions, mixins, variables and placeholders, generated from the SassDoc comments of the source. Build it with `cd docs && npm ci && npm run dev`. It is published with GitLab Pages from `main`, with the documentation of every released version (selector at the top right, `next` is `main`) and a gallery of the component styles.
+The [documentation site][docs] has the guides and a reference of the functions, mixins, variables and placeholders, generated from the SassDoc comments of the source. Build it with `cd docs && npm ci && npm run dev`. It is published with GitLab Pages from `main`, with the documentation of every released version (selector at the top right, `next` is `main`) and a gallery of the component styles.
 
 ---
 
@@ -957,3 +958,5 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development workflow.
 [prettier-badge]: https://img.shields.io/badge/formatter-prettier-F7B93E.svg?logo=prettier
 [prettier]: https://prettier.io
 [ecosystem]: https://gitlab.com/zairakai
+[docs]: https://mithril-scss-29f2e5.gitlab.io
+[docs-badge]: https://img.shields.io/badge/docs-online-blue
