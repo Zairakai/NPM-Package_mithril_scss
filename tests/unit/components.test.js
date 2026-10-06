@@ -1,3 +1,4 @@
+import { createRequire } from 'module'
 import path from 'path'
 import * as sass from 'sass'
 import { fileURLToPath } from 'url'
@@ -87,5 +88,23 @@ describe('scoped component styles', () => {
     expect(scoped).toMatch(/\.demo \.card-header/)
     expect(scoped).toMatch(/\.demo \.modal::backdrop/)
     expect(scoped).not.toMatch(/^\.card-header/m)
+  })
+})
+
+describe('exports of the package', () => {
+  const resolve = createRequire(import.meta.url).resolve
+
+  it.each(['functions', 'mixins', 'variables', 'placeholders', 'grid', 'spacing'])(
+    'exposes src/%s, with and without the extension',
+    (name) => {
+      expect(resolve(`@zairakai/mithril-scss/src/${name}`)).toMatch(new RegExp(`src/${name}\\.scss$`))
+      expect(resolve(`@zairakai/mithril-scss/src/${name}.scss`)).toMatch(new RegExp(`src/${name}\\.scss$`))
+    }
+  )
+
+  it('still exposes the entry, the bases and the component styles', () => {
+    expect(resolve('@zairakai/mithril-scss')).toMatch(/src\/index\.scss$/)
+    expect(resolve('@zairakai/mithril-scss/bases/reset.scss')).toMatch(/src\/bases\/reset\.scss$/)
+    expect(resolve('@zairakai/mithril-scss/components')).toMatch(/src\/components\/index\.scss$/)
   })
 })
