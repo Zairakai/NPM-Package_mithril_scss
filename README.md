@@ -937,6 +937,10 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development workflow.
 
 <!-- Reference Links -->
 
+## Statistics
+
+![Statistics of mithril-scss][stats-card]
+
 [pipeline-main-badge]: https://gitlab.com/zairakai/npm-packages/mithril-scss/badges/main/pipeline.svg?ignore_skipped=true&key_text=Main
 [pipeline-main-link]: https://gitlab.com/zairakai/npm-packages/mithril-scss/-/commits/main
 [pipeline-develop-badge]: https://gitlab.com/zairakai/npm-packages/mithril-scss/badges/develop/pipeline.svg?ignore_skipped=true&key_text=Develop
@@ -960,3 +964,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development workflow.
 [ecosystem]: https://gitlab.com/zairakai
 [docs]: https://mithril-scss-29f2e5.gitlab.io
 [docs-badge]: https://img.shields.io/badge/docs-online-blue
+[stats-card]: https://gitlab.com/zairakai/gitlab-profile/-/raw/main/assets/projects/mithril-scss.svg
