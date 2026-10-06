@@ -61,6 +61,8 @@ An opt-in stylesheet styles the class hooks and the state attributes of the comp
 @use "@zairakai/mithril-scss/components" with ($dark-theme: (...), $emit-tokens: false);
 ```
 
+To use it inside a part of a page only, give it a scope: `@use "@zairakai/mithril-scss/components" with ($scope: ".demo");`.
+
 The look is made of CSS custom properties (`--primary`, `--surface`, `--zk-border`, `--zk-radius`…): change them on `:root` or on any element.
 
 ## Documentation

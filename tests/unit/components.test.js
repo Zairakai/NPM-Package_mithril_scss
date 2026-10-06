@@ -69,3 +69,23 @@ describe('component styles', () => {
     expect(custom).toMatch(/--surface: #000/)
   })
 })
+
+describe('scoped component styles', () => {
+  const scoped = compile('@use "src/components" with ($scope: ".demo");')
+
+  it('writes the tokens on the scope and not on the page', () => {
+    expect(scoped).toMatch(/^\.demo\s*{[^}]*--primary:/m)
+    expect(scoped).not.toMatch(/^:root\s*{/m)
+  })
+
+  it('writes the dark tokens under the scope', () => {
+    expect(scoped).toMatch(/:root\[data-theme=dark] \.demo\s*{[^}]*--surface: #1e1e1e/)
+    expect(scoped).toMatch(/:root:not\(\[data-theme=light]\) \.demo\s*{[^}]*--surface: #1e1e1e/)
+  })
+
+  it('writes the rules of the components under the scope only', () => {
+    expect(scoped).toMatch(/\.demo \.card-header/)
+    expect(scoped).toMatch(/\.demo \.modal::backdrop/)
+    expect(scoped).not.toMatch(/^\.card-header/m)
+  })
+})

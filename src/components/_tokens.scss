@@ -27,6 +27,20 @@ $dark-theme: (
 /// Emit the tokens (set to false if the application already writes them).
 $emit-tokens: true !default;
 
+/// Limit the stylesheet to an element, for a part of a page (a documentation site that has its
+/// own classes, a widget): every rule is written under this selector and the tokens on it.
+///   @use "@zairakai/mithril-scss/components" with ($scope: ".demo");
+$scope: null !default;
+$-light-selector: ":root";
+$-dark-selector: ':root[data-theme="dark"]';
+$-system-dark-selector: ':root:not([data-theme="light"])';
+
+@if $scope {
+  $-light-selector: $scope;
+  $-dark-selector: ':root[data-theme="dark"] #{$scope}';
+  $-system-dark-selector: ':root:not([data-theme="light"]) #{$scope}';
+}
+
 @mixin -component-tokens($dark: false) {
   $alpha-1: 0.18;
   $alpha-2: 0.2;
@@ -51,7 +65,7 @@ $emit-tokens: true !default;
 }
 
 @if $emit-tokens {
-  :root {
+  #{$-light-selector} {
     @include mx.generate-theme;
     @include -component-tokens;
 
@@ -69,7 +83,7 @@ $emit-tokens: true !default;
     color-scheme: light;
   }
 
-  :root[data-theme="dark"] {
+  #{$-dark-selector} {
     @include mx.generate-theme($dark-theme);
     @include -component-tokens(true);
 
@@ -81,7 +95,7 @@ $emit-tokens: true !default;
   }
 
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
+    #{$-system-dark-selector} {
       @include mx.generate-theme($dark-theme);
       @include -component-tokens(true);
 
