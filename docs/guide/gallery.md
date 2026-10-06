@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD033 -->
+
 # Gallery
 
 The [component styles](/guide/components) applied to the markup of `@zairakai/vue-components`. Switch the theme of the site (the moon at the top right) to see the dark mode: the styles follow `data-theme`.
