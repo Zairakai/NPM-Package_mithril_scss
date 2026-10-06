@@ -44,7 +44,9 @@
   "exports": {
     ".": "./src/index.scss",
     "./bases/*.scss": "./src/bases/*.scss",
-    "./components": "./src/components/index.scss"
+    "./components": "./src/components/index.scss",
+    "./src/*.scss": "./src/*.scss",
+    "./src/*": "./src/*.scss"
   },
   "files": [
     "src"
