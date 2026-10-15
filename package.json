@@ -68,7 +68,7 @@
     "validate": "make quality"
   },
   "devDependencies": {
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.3",
     "@zairakai/js-dev-tools": "^3.5.0",
     "knip": "^6.41.0",
