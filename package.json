@@ -73,9 +73,9 @@
   "devDependencies": {
     "@types/node": "^26.6.6",
     "@vitest/coverage-v8": "^5.0.5",
-    "@zairakai/js-dev-tools": "^3.18.0",
-    "knip": "^6.43.0",
-    "sass": "^1.107.0",
+    "@zairakai/js-dev-tools": "^3.19.0",
+    "knip": "^6.44.1",
+    "sass": "^1.107.1",
     "sort-package-json": "^4.1.0",
     "vitest": "^5.0.5"
   },
