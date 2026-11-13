@@ -1,4 +1,4 @@
-@use "sass:meta";
+@use 'sass:meta';
 
 /// Opt-in styles for the class hooks and state attributes of @zairakai/vue-components.
 /// Light and dark modes included. It outputs CSS: @use it once, where you want the styles.
@@ -9,21 +9,37 @@
 ///
 ///   @use "@zairakai/mithril-scss/components" with ($dark-theme: (...), $emit-tokens: false);
 ///   @use "@zairakai/mithril-scss/components" with ($scope: ".demo");
+///
+/// The base reset is written first. Turn it off if you load your own:
+///
+///   @use "@zairakai/mithril-scss/components" with ($reset: false);
+///
+/// Join the elements with `__` instead of `-` (`.card__header`, not `.card-header`):
+///
+///   @use "@zairakai/mithril-scss/components" with ($element-separator: "__");
 
-@forward "tokens";
-@use "tokens";
+// What `with (...)` can set, loaded before anything else uses it.
+@forward '../config';
+@forward 'tokens';
+@use '../config';
+@use 'tokens';
 
 @mixin -styles {
-  @include meta.load-css("display");
-  @include meta.load-css("feedback");
-  @include meta.load-css("navigation");
-  @include meta.load-css("overlay");
-  @include meta.load-css("data");
-  @include meta.load-css("content");
-  @include meta.load-css("layout");
-  @include meta.load-css("media");
-  @include meta.load-css("form");
-  @include meta.load-css("utility");
+  @include meta.load-css('display');
+  @include meta.load-css('feedback');
+  @include meta.load-css('navigation');
+  @include meta.load-css('overlay');
+  @include meta.load-css('data');
+  @include meta.load-css('content');
+  @include meta.load-css('layout');
+  @include meta.load-css('media');
+  @include meta.load-css('form');
+  @include meta.load-css('utility');
+}
+
+// The reset comes first, before the components that build on it.
+@if config.$reset and not tokens.$scope {
+  @include meta.load-css('../bases/reset');
 }
 
 @if tokens.$scope {

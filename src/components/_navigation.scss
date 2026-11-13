@@ -1,4 +1,4 @@
-@use "shared";
+@use 'shared';
 
 .tabs {
   display: flex;
@@ -17,16 +17,16 @@
   position: relative;
   border-radius: var(--zk-radius) var(--zk-radius) 0 0;
 
-  &[aria-selected="true"] {
+  &[aria-selected='true'] {
     font-weight: 600;
     color: var(--primary);
 
     &::after {
+      content: '';
       position: absolute;
       inset-block-end: -1px;
       inset-inline: 0;
       block-size: 2px;
-      content: "";
       background: var(--primary);
     }
   }
@@ -43,25 +43,25 @@
 .pagination {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--zk-space-1);
   align-items: center;
+  gap: var(--zk-space-1);
 
-  &-item {
+  @include shared.element(item) {
     @include shared.ghost-button;
 
     min-inline-size: 2.25rem;
+    border: 1px solid var(--zk-border);
     text-align: center;
     text-decoration: none;
-    border: 1px solid var(--zk-border);
 
-    &[aria-current="page"] {
+    &[aria-current='page'] {
+      border-color: var(--primary);
       color: var(--on-primary);
       background: var(--primary);
-      border-color: var(--primary);
     }
   }
 
-  &-gap {
+  @include shared.element(gap) {
     padding: 0 var(--zk-space-1);
     color: var(--zk-muted);
   }
@@ -70,11 +70,11 @@
 .breadcrumb {
   display: flex;
   flex-wrap: wrap;
-  padding: 0;
   margin: 0;
+  padding: 0;
   list-style: none;
 
-  &-item {
+  @include shared.element(item) {
     display: flex;
     align-items: center;
 
@@ -85,62 +85,62 @@
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
+  content: '/';
   padding-inline: var(--zk-space-2);
   color: var(--zk-muted);
-  content: "/";
 }
 
 .stepper {
   display: flex;
   gap: var(--zk-space-3);
-  padding: 0;
   margin: 0;
+  padding: 0;
   list-style: none;
 }
 
 .step {
   display: flex;
   flex: 1;
-  gap: var(--zk-space-2);
   align-items: center;
+  gap: var(--zk-space-2);
 
-  &-trigger {
+  @include shared.element(trigger) {
     @include shared.ghost-button;
 
     display: flex;
-    gap: var(--zk-space-2);
     align-items: center;
+    gap: var(--zk-space-2);
   }
 
-  &-marker {
+  @include shared.element(marker) {
     display: inline-flex;
     flex: none;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     inline-size: 1.75rem;
     block-size: 1.75rem;
-    color: var(--on-surface);
     border: 2px solid var(--zk-border-strong);
     border-radius: 50%;
+    color: var(--on-surface);
   }
 
-  &[data-state="current"] &-marker {
+  &[data-state='current'] &#{shared.part(marker)} {
+    border-color: var(--primary);
     color: var(--on-primary);
     background: var(--primary);
-    border-color: var(--primary);
   }
 
-  &[data-state="complete"] &-marker {
+  &[data-state='complete'] &#{shared.part(marker)} {
+    border-color: var(--zk-success);
     color: var(--on-primary);
     background: var(--zk-success);
-    border-color: var(--zk-success);
   }
 
-  &[data-state="upcoming"] {
+  &[data-state='upcoming'] {
     color: var(--zk-muted);
   }
 
-  &-description {
+  @include shared.element(description) {
     font-size: 0.875em;
     color: var(--zk-muted);
   }
@@ -148,8 +148,8 @@
 
 .tree-view,
 .tree-group {
-  padding: 0;
   margin: 0;
+  padding: 0;
   list-style: none;
 }
 
@@ -159,11 +159,11 @@
 
 .tree-item-row {
   display: flex;
-  gap: var(--zk-space-1);
   align-items: center;
+  gap: var(--zk-space-1);
   padding: var(--zk-space-1) var(--zk-space-2);
-  cursor: pointer;
   border-radius: var(--zk-radius);
+  cursor: pointer;
 
   &:hover {
     background: var(--zk-hover);
@@ -174,8 +174,8 @@
   }
 
   &[data-disabled] {
-    cursor: not-allowed;
     opacity: 0.38;
+    cursor: not-allowed;
   }
 
   &:focus-visible {
@@ -186,64 +186,64 @@
 .tree-item-toggle {
   inline-size: 1rem;
   padding: 0;
+  border: 0;
   color: inherit;
   background: transparent;
-  border: 0;
 }
 
 .command-palette {
   padding: var(--zk-space-2);
 
-  &-input {
+  @include shared.element(input) {
     @include shared.field;
 
     inline-size: 100%;
   }
 
-  &-list {
+  @include shared.element(list) {
     max-block-size: 20rem;
     margin-block-start: var(--zk-space-2);
     overflow-y: auto;
   }
 
-  &-heading {
+  @include shared.element(heading) {
     padding: var(--zk-space-1) var(--zk-space-2);
     font-size: 0.75em;
     font-weight: 600;
-    color: var(--zk-muted);
     text-transform: uppercase;
+    color: var(--zk-muted);
   }
 
-  &-command {
+  @include shared.element(command) {
     display: flex;
     justify-content: space-between;
     padding: var(--zk-space-2);
-    cursor: pointer;
     border-radius: var(--zk-radius);
+    cursor: pointer;
 
     &[data-active] {
       background: var(--zk-pressed);
     }
 
-    &[aria-disabled="true"] {
-      cursor: not-allowed;
+    &[aria-disabled='true'] {
       opacity: 0.38;
+      cursor: not-allowed;
     }
   }
 
-  &-empty {
+  @include shared.element(empty) {
     padding: var(--zk-space-3);
-    color: var(--zk-muted);
     text-align: center;
+    color: var(--zk-muted);
   }
 }
 
 .skip-link {
-  z-index: 1000;
+  z-index: shared.layer(overlay);
   padding: var(--zk-space-2) var(--zk-space-3);
+  border-radius: 0 0 var(--zk-radius) 0;
   color: var(--on-primary);
   background: var(--primary);
-  border-radius: 0 0 var(--zk-radius) 0;
 }
 
 .back-to-top {
@@ -252,11 +252,11 @@
   position: fixed;
   inset-block-end: var(--zk-space-3);
   inset-inline-end: var(--zk-space-3);
-  z-index: 800;
+  z-index: shared.layer(floating);
   padding: var(--zk-space-2) var(--zk-space-3);
+  border-radius: 999px;
   font: inherit;
   cursor: pointer;
-  border-radius: 999px;
 
   &:hover {
     background: var(--zk-hover);

@@ -1,0 +1,277 @@
+@use 'sass:list';
+@use 'sass:map';
+@use 'variables' as MithrilVariables;
+@use 'functions' as MithrilFunctions;
+
+/// --------------------------------------------
+/// File : animations.scss
+/// Description : Keyframes and utility classes, from the motion of Material 3.
+/// --------------------------------------------
+///
+/// Output CSS: `@use` it once, where you want the keyframes. Everything is CSS, no JavaScript.
+///
+///   @use "@zairakai/mithril-scss/animations";
+///
+/// The keyframes are named `zk-<animation>`. The classes `.animate-<animation>` start one, with
+/// the duration and easing that Material 3 gives to what enters (400ms, emphasized decelerate) or
+/// leaves (200ms, emphasized accelerate). Nothing moves for the readers who set
+/// `prefers-reduced-motion`.
+///
+/// Each element has its own timing, so a submit button and a reset button can differ. Three ways,
+/// from the markup or from the stylesheet:
+///
+/// - classes: `animate-fade-in animate-duration-short2 animate-easing-standard animate-delay-short4`
+/// - properties on the element: `--animate-duration`, `--animate-easing`, `--animate-delay`,
+///   `--animate-iteration`
+/// - properties of one animation, which win over the general ones: `--animate-fade-in-duration`...
+///
+/// The properties do not inherit: setting one on a parent does not change its children.
+
+$-distance: 1rem;
+
+@keyframes zk-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes zk-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes zk-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes zk-scale-out {
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes zk-slide-up-in {
+  from {
+    opacity: 0;
+    transform: translateY($-distance);
+  }
+}
+
+@keyframes zk-slide-up-out {
+  to {
+    opacity: 0;
+    transform: translateY(-$-distance);
+  }
+}
+
+@keyframes zk-slide-down-in {
+  from {
+    opacity: 0;
+    transform: translateY(-$-distance);
+  }
+}
+
+@keyframes zk-slide-down-out {
+  to {
+    opacity: 0;
+    transform: translateY($-distance);
+  }
+}
+
+// `start` and `end` follow the writing direction: an element that slides in from the start comes
+// from the left in a left-to-right page, and from the right in a right-to-left one.
+@keyframes zk-slide-start-in {
+  from {
+    opacity: 0;
+    transform: translateX(-$-distance);
+  }
+}
+
+@keyframes zk-slide-start-out {
+  to {
+    opacity: 0;
+    transform: translateX(-$-distance);
+  }
+}
+
+@keyframes zk-slide-end-in {
+  from {
+    opacity: 0;
+    transform: translateX($-distance);
+  }
+}
+
+@keyframes zk-slide-end-out {
+  to {
+    opacity: 0;
+    transform: translateX($-distance);
+  }
+}
+
+@keyframes zk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes zk-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes zk-shake {
+  20%,
+  60% {
+    transform: translateX(-0.25rem);
+  }
+
+  40%,
+  80% {
+    transform: translateX(0.25rem);
+  }
+}
+
+// The properties of an element's animation do not inherit, so each element has its own timing.
+@property --animate-duration {
+  inherits: false;
+  syntax: '*';
+}
+
+@property --animate-easing {
+  inherits: false;
+  syntax: '*';
+}
+
+@property --animate-delay {
+  inherits: false;
+  syntax: '*';
+}
+
+@property --animate-iteration {
+  inherits: false;
+  syntax: '*';
+}
+
+$-continuous: (
+  spin: (
+    duration: 1s,
+    easing: linear,
+    iteration: infinite,
+  ),
+  pulse: (
+    duration: 2s,
+    easing: standard,
+    iteration: infinite,
+  ),
+  shake: (
+    duration: medium2,
+    easing: standard,
+    iteration: 1,
+  ),
+);
+$-leaving: (
+  fade-out,
+  scale-out,
+  slide-up-out,
+  slide-down-out,
+  slide-start-out,
+  slide-end-out
+);
+
+// The value of a timing: the property of this animation, else the general one, else the default.
+@function -timing($name, $property, $default) {
+  @return var(
+    --animate-#{$name}-#{$property},
+    var(--animate-#{$property}, #{$default})
+  );
+}
+
+@each $name in MithrilVariables.$animations {
+  $iteration: 1;
+
+  // What leaves is faster and accelerates, what enters is slower and decelerates: `$motion`.
+  $motion: enter;
+
+  @if list.index($-leaving, $name) {
+    $motion: exit;
+  }
+
+  $duration-value: MithrilFunctions.get-motion($motion, duration);
+  $easing-value: MithrilFunctions.get-motion($motion, easing);
+
+  // What turns or beats goes on until it is stopped.
+  @if map.has-key($-continuous, $name) {
+    $own: map.get($-continuous, $name);
+    $duration-value: map.get($own, duration);
+    $easing-value: map.get($own, easing);
+    $iteration: map.get($own, iteration);
+
+    @if map.has-key(MithrilVariables.$durations, $duration-value) {
+      $duration-value: map.get(MithrilVariables.$durations, $duration-value);
+    }
+
+    @if map.has-key(MithrilVariables.$easings, $easing-value) {
+      $easing-value: map.get(MithrilVariables.$easings, $easing-value);
+    }
+  }
+
+  .animate-#{$name} {
+    animation: zk-#{$name} -timing($name, duration, $duration-value) -timing(
+        $name,
+        easing,
+        $easing-value
+      ) -timing($name, delay, 0s) -timing($name, iteration, $iteration)
+      both;
+  }
+}
+
+// One class for each duration, easing and delay of Material 3, to set them from the markup.
+@each $key, $value in MithrilVariables.$durations {
+  .animate-duration-#{$key} {
+    --animate-duration: #{$value};
+  }
+
+  .animate-delay-#{$key} {
+    --animate-delay: #{$value};
+  }
+}
+
+@each $key, $value in MithrilVariables.$easings {
+  .animate-easing-#{$key} {
+    --animate-easing: #{$value};
+  }
+}
+
+.animate-infinite {
+  --animate-iteration: infinite;
+}
+
+:dir(rtl) {
+  .animate-slide-start-in {
+    animation-name: zk-slide-end-in;
+  }
+
+  .animate-slide-end-in {
+    animation-name: zk-slide-start-in;
+  }
+
+  .animate-slide-start-out {
+    animation-name: zk-slide-end-out;
+  }
+
+  .animate-slide-end-out {
+    animation-name: zk-slide-start-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*='animate-'] {
+    animation: none !important;
+  }
+}

@@ -1,4 +1,4 @@
-@use "shared";
+@use 'shared';
 
 .card {
   @include shared.surface;
@@ -6,18 +6,16 @@
   display: flex;
   flex-direction: column;
 
-  &-header,
-  &-body,
-  &-footer {
+  @include shared.element(header, body, footer) {
     padding: var(--zk-space-3);
   }
 
-  &-header {
-    font-weight: 600;
+  @include shared.element(header) {
     border-bottom: 1px solid var(--zk-border);
+    font-weight: 600;
   }
 
-  &-footer {
+  @include shared.element(footer) {
     border-top: 1px solid var(--zk-border);
   }
 }
@@ -25,26 +23,26 @@
 .badge {
   display: inline-block;
   padding: 0 var(--zk-space-2);
+  border-radius: 999px;
   font-size: 0.75em;
   font-weight: 600;
   line-height: 1.6;
   color: var(--on-primary);
   background: var(--primary);
-  border-radius: 999px;
 
-  &[data-variant="info"] {
+  &[data-variant='info'] {
     background: var(--zk-info);
   }
 
-  &[data-variant="success"] {
+  &[data-variant='success'] {
     background: var(--zk-success);
   }
 
-  &[data-variant="warning"] {
+  &[data-variant='warning'] {
     background: var(--zk-warning);
   }
 
-  &[data-variant="error"] {
+  &[data-variant='error'] {
     color: var(--on-error);
     background: var(--error);
   }
@@ -52,13 +50,13 @@
 
 .avatar {
   display: inline-flex;
-  align-items: center;
   justify-content: center;
-  overflow: hidden;
+  align-items: center;
+  border-radius: 50%;
   font-weight: 600;
   color: var(--on-primary);
   background: var(--primary);
-  border-radius: 50%;
+  overflow: hidden;
 
   img {
     inline-size: 100%;
@@ -69,17 +67,17 @@
 
 .divider {
   display: flex;
-  gap: var(--zk-space-2);
   align-items: center;
+  gap: var(--zk-space-2);
   margin-block: var(--zk-space-3);
-  color: var(--zk-muted);
   border: 0;
+  color: var(--zk-muted);
 
   &::before,
   &::after {
+    content: '';
     flex: 1;
     block-size: 1px;
-    content: "";
     background: var(--zk-border);
   }
 
@@ -104,21 +102,21 @@ hr.divider {
 
   overflow: hidden;
 
-  &-item + &-item {
+  &#{shared.part(item)} + &#{shared.part(item)} {
     border-top: 1px solid var(--zk-border);
   }
 
-  &-trigger {
+  @include shared.element(trigger) {
     display: flex;
     inline-size: 100%;
     padding: var(--zk-space-3);
+    border: 0;
     font: inherit;
     font-weight: 600;
-    color: inherit;
     text-align: start;
-    cursor: pointer;
+    color: inherit;
     background: transparent;
-    border: 0;
+    cursor: pointer;
 
     &:hover {
       background: var(--zk-hover);
@@ -131,7 +129,7 @@ hr.divider {
     }
   }
 
-  &-panel {
+  @include shared.element(panel) {
     padding: 0 var(--zk-space-3) var(--zk-space-3);
   }
 
@@ -144,46 +142,46 @@ hr.divider {
 .chip {
   display: inline-flex;
   align-items: center;
-  background: var(--zk-hover);
   border: 1px solid var(--zk-border);
   border-radius: 999px;
+  background: var(--zk-hover);
 
   @include shared.variants;
 
   &[data-selected] {
+    border-color: var(--primary);
     color: var(--on-primary);
     background: var(--primary);
-    border-color: var(--primary);
   }
 
   &[data-disabled] {
     opacity: 0.38;
   }
 
-  &-label {
+  @include shared.element(label) {
     padding: 0 var(--zk-space-2);
+    border: 0;
     font: inherit;
     color: inherit;
     background: transparent;
-    border: 0;
   }
 
   button.chip-label {
     cursor: pointer;
   }
 
-  &-icon {
+  @include shared.element(icon) {
     padding-inline-start: var(--zk-space-2);
   }
 
-  &-remove {
+  @include shared.element(remove) {
     @include shared.ghost-button;
 
     padding: 0 var(--zk-space-2);
     border-radius: 999px;
   }
 
-  &-group {
+  @include shared.element(group) {
     display: flex;
     flex-wrap: wrap;
     gap: var(--zk-space-2);
@@ -191,11 +189,11 @@ hr.divider {
 }
 
 .list {
-  padding: 0;
   margin: 0;
+  padding: 0;
   list-style: none;
 
-  &-item {
+  @include shared.element(item) {
     border-bottom: 1px solid var(--zk-border);
 
     &[data-selected] > .list-item-body {
@@ -206,33 +204,33 @@ hr.divider {
       opacity: 0.38;
     }
 
-    &-body {
+    @include shared.element(body) {
       display: flex;
-      gap: var(--zk-space-3);
       align-items: center;
+      gap: var(--zk-space-3);
       inline-size: 100%;
       padding: var(--zk-space-2) var(--zk-space-3);
+      border: 0;
       font: inherit;
-      color: inherit;
       text-align: start;
       text-decoration: none;
+      color: inherit;
       background: transparent;
-      border: 0;
     }
 
-    &-content {
+    @include shared.element(content) {
       display: flex;
       flex: 1;
       flex-direction: column;
     }
 
-    &-subtitle {
+    @include shared.element(subtitle) {
       font-size: 0.875em;
       color: var(--zk-muted);
     }
   }
 
-  &[data-selectable] &-item-body,
+  &[data-selectable] &#{shared.part(item-body)},
   a.list-item-body {
     cursor: pointer;
 
@@ -249,22 +247,22 @@ hr.divider {
 }
 
 .timeline {
-  padding: 0;
   margin: 0;
+  padding: 0;
   list-style: none;
 
-  &-item {
+  @include shared.element(item) {
     position: relative;
     display: flex;
     gap: var(--zk-space-3);
     padding-block-end: var(--zk-space-3);
 
     &::before {
+      content: '';
       position: absolute;
       inset-block: 1.25rem 0;
       inset-inline-start: 0.4rem;
       inline-size: 2px;
-      content: "";
       background: var(--zk-border);
     }
 
@@ -275,22 +273,22 @@ hr.divider {
     @include shared.variants(--zk-marker);
   }
 
-  &-marker {
+  @include shared.element(marker) {
     position: relative;
     flex: none;
     inline-size: 0.9rem;
     block-size: 0.9rem;
     margin-block-start: 0.25rem;
-    background: var(--zk-marker, var(--primary));
     border-radius: 50%;
+    background: var(--zk-marker, var(--primary));
   }
 
-  &-time {
+  @include shared.element(time) {
     font-size: 0.8125em;
     color: var(--zk-muted);
   }
 
-  &-title {
+  @include shared.element(title) {
     margin: 0;
     font-weight: 600;
   }
@@ -305,15 +303,19 @@ hr.divider {
 .rating-star {
   color: var(--zk-border-strong);
 
-  &[data-state="full"],
-  &[data-state="half"] {
+  &[data-state='full'],
+  &[data-state='half'] {
     color: var(--zk-warning);
   }
 
-  &[data-state="half"] {
-    background: linear-gradient(90deg, var(--zk-warning) 50%, var(--zk-border-strong) 50%);
-    background-clip: text;
+  &[data-state='half'] {
     -webkit-text-fill-color: transparent;
+    background: linear-gradient(
+      90deg,
+      var(--zk-warning) 50%,
+      var(--zk-border-strong) 50%
+    );
+    background-clip: text;
   }
 }
 
@@ -322,8 +324,8 @@ hr.divider {
     @include shared.focus-ring;
   }
 
-  &[aria-readonly="true"] .rating-star,
-  &[aria-disabled="true"] .rating-star {
+  &[aria-readonly='true'] .rating-star,
+  &[aria-disabled='true'] .rating-star {
     cursor: default;
   }
 
@@ -335,52 +337,52 @@ hr.divider {
 .empty-state {
   display: flex;
   flex-direction: column;
-  gap: var(--zk-space-2);
   align-items: center;
+  gap: var(--zk-space-2);
   padding: var(--zk-space-4);
-  color: var(--zk-muted);
   text-align: center;
+  color: var(--zk-muted);
 
-  &-title {
+  @include shared.element(title) {
     margin: 0;
     font-weight: 600;
     color: var(--on-surface);
   }
 
-  &-description {
+  @include shared.element(description) {
     margin: 0;
   }
 }
 
 .stat {
-  &-list {
+  @include shared.element(list) {
     margin: 0;
   }
 
-  &-label {
+  @include shared.element(label) {
     font-size: 0.875em;
     color: var(--zk-muted);
   }
 
-  &-value {
+  @include shared.element(value) {
     margin: 0;
     font-size: 1.75em;
     font-weight: 700;
   }
 
-  &-change {
+  @include shared.element(change) {
     margin: 0;
     font-size: 0.875em;
 
-    &[data-sentiment="positive"] {
+    &[data-sentiment='positive'] {
       color: var(--zk-success);
     }
 
-    &[data-sentiment="negative"] {
+    &[data-sentiment='negative'] {
       color: var(--error);
     }
 
-    &[data-sentiment="neutral"] {
+    &[data-sentiment='neutral'] {
       color: var(--zk-muted);
     }
   }

@@ -10,9 +10,11 @@
 /// - Grid: `%placeholders` for responsive grid layout utilities.
 /// - Spacing: `%placeholders` for margin and padding control.
 
-@forward "functions"; /// Sass functions used across the framework.
-@forward "mixins"; /// Reusable style mixins for consistent styling.
-@forward "variables"; /// Design tokens like colors, fonts, and sizes.
-@forward "grid"; /// `%placeholders` for responsive grid utilities.
-@forward "spacing"; /// `%placeholders` for spacing (margins and padding).
-@forward "placeholders"; /// `%placeholders` for shared style extensions.
+// The settings first: the first module to load is the one `with (...)` configures.
+@forward 'config'; /// Settings: base font size, default grid, element separator.
+@forward 'variables'; /// Design tokens like colors, fonts, and sizes.
+@forward 'functions'; /// Sass functions used across the framework.
+@forward 'mixins'; /// Reusable style mixins for consistent styling.
+@forward 'grid'; /// `%placeholders` for responsive grid utilities.
+@forward 'spacing'; /// `%placeholders` for spacing (margins and padding).
+@forward 'placeholders'; /// `%placeholders` for shared style extensions.

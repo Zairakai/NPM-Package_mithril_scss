@@ -52,6 +52,16 @@ To use the stylesheet inside an element only (a documentation site that has its 
 @use "@zairakai/mithril-scss/components" with ($scope: ".demo");
 ```
 
+## Change how elements are named
+
+The elements of a component are joined to it with a dash: `.card-header`. Set the separator to get `.card__header` instead:
+
+```scss
+@use "@zairakai/mithril-scss/components" with ($element-separator: "__");
+```
+
+The stylesheet only writes the selectors. The markup is yours to name the same way: `@zairakai/vue-components` writes the dash, so keep the default with it.
+
 ## Use it with the theme switcher
 
 ```vue

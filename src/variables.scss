@@ -1,16 +1,37 @@
-@use "sass:list";
-@use "sass:map";
+@use 'sass:list';
+@use 'sass:map';
+@use 'config';
 
 /// --------------------------------------------
 /// File : _variables.scss
 /// Description : Global variables (colors, spacings, typography, breakpoints).
 /// --------------------------------------------
 
+/// The partial overrides: `config.$overrides` holds, per map, the keys the consumer changes.
+/// They are merged (deeply) into the defaults, right where the map is defined, so
+/// everything computed from it afterwards follows.
+$-extended: ();
+
+@function -extend($name, $map) {
+  $-extended: list.append($-extended, $name) !global;
+
+  @if not map.has-key(config.$overrides, $name) {
+    @return $map;
+  }
+
+  @return map.deep-merge($map, map.get(config.$overrides, $name));
+}
+
 /// ========================
 /// Used Variables
 /// ========================
 $used-variables: ();
 
+/// Records that a design token is used, so that `export-css-variables()` writes it.
+/// Called by `vars()`: use that one in the stylesheets.
+///
+/// @param {string} $var-name - The name of the token, without the leading dashes.
+/// @return {map} - The map of the tokens recorded so far.
 @function add-used-variable($var-name) {
   @if not map.has-key($used-variables, $var-name) {
     $used-variables: map.merge(
@@ -24,12 +45,30 @@ $used-variables: ();
   @return $used-variables;
 }
 
+/// References a design token as a CSS custom property, and records it so that `export-css-variables()` writes it on
+/// `:root`. A token that no stylesheet references through `vars()` is not exported: the CSS stays as small as what it uses.
+///
+/// @param {string} $var-name - The name of the token, without the leading dashes (e.g. `blue-grey-darken-2`, `spacing-md`).
+/// @return {string} - The `var(--name)` reference.
+///
+/// @example scss
+///   .button {
+///     background: vars('blue-grey-darken-2'); // var(--blue-grey-darken-2)
+///     padding: vars('spacing-md');            // var(--spacing-md)
+///   }
+///
+///   :root {
+///     @include mx.export-css-variables(); // --blue-grey-darken-2: #455a64; --blue-grey-darken-2-rgb: 69 90 100; ...
+///   }
 @function vars($var-name) {
   $_: add-used-variable($var-name);
 
   @return var(--#{$var-name});
 }
 
+/// Lists the tokens recorded by `vars()`.
+///
+/// @return {list} - The names of the tokens in use.
 @function get-used-variables() {
   @return map.keys($used-variables);
 }
@@ -38,181 +77,81 @@ $used-variables: ();
 /// Breakpoints
 /// ========================
 
-/// Defines breakpoints for portrait and landscape orientations.
-/// These breakpoints are used to manage responsive layouts across devices.
+/// The width classes, from the smallest screen to the largest. Material 3 window size classes.
 ///
-/// The breakpoints are defined for both orientations (landscape and portrait) and consist of:
-/// - small, medium, large, etc. for various screen sizes
-/// - min-width and max-width in `px` converted to `rem` using the `px-to-rem` function.
+/// The styles are written mobile first: the base rules are for the smallest screen (a phone of
+/// 320px), and a media query only redefines what changes from its width up (`min-width`).
+/// What is not in a query is the base: it is for the smallest screen, and a screen narrower
+/// than a phone, like a watch, gets it too. That is why the first class starts above 0.
+///
+/// - below `medium`: phones, up to 599px (the base)
+/// - `medium`: tablets in portrait, 600px and over
+/// - `expanded`: tablets in landscape, small laptops, 840px and over
+/// - `large`: laptops and desktops, 1200px and over
+/// - `extra-large`: wide desktops, 1600px and over
 $breakpoints: (
-  landscape: (
-    small: (
-      min-width: 426px,
-      max-width: 767px,
-    ),
-    small-tablet: (
-      min-width: 768px,
-      max-width: 1023px,
-    ),
-    large-tablet: (
-      min-width: 1024px,
-      max-width: 1279px,
-    ),
-    laptop: (
-      min-width: 1280px,
-      max-width: 1439px,
-    ),
-    desktop: (
-      min-width: 1440px,
-      max-width: 1919px,
-    ),
-    wide-screen: (
-      min-width: 1920px,
-      max-width: 2560px,
-    ),
-  ),
-  portrait: (
-    small: (
-      min-width: 321px,
-      max-width: 375px,
-    ),
-    medium: (
-      min-width: 376px,
-      max-width: 425px,
-    ),
-    large: (
-      min-width: 426px,
-      max-width: 767px,
-    ),
-    small-tablet: (
-      min-width: 768px,
-      max-width: 1023px,
-    ),
-    large-tablet: (
-      min-width: 1024px,
-      max-width: 1279px,
-    ),
-    laptop: (
-      min-width: 1280px,
-      max-width: 1439px,
-    ),
-    desktop: (
-      min-width: 1440px,
-      max-width: 1919px,
-    ),
-    wide-screen: (
-      min-width: 1920px,
-      max-width: 2560px,
-    ),
-  ),
+  medium: 600px,
+  expanded: 840px,
+  large: 1200px,
+  extra-large: 1600px,
 ) !default;
+$breakpoints: -extend('breakpoints', $breakpoints);
+
+/// The height classes, for the screens that are wide but short (a phone in landscape).
+/// Below `medium` is the base (480px: the 320x480 phone is the smallest screen planned).
+$breakpoints-height: (
+  medium: 480px,
+  expanded: 900px,
+) !default;
+$breakpoints-height: -extend('breakpoints-height', $breakpoints-height);
 
 /// ========================
 /// Container
 /// ========================
 
-/// Maximum widths for containers based on portrait and landscape orientations.
-/// Used to control adaptive sizes of main containers.
-///
-/// Each breakpoint contains a max-width value in `rem` to maintain flexibility across devices.
+/// The maximum width of a container, for each width class. The `base` fills the screen.
+/// A container is as wide as the class it starts at, so the content never gets wider than
+/// the screen that the class is made for.
 $containers: (
-  landscape: (
-    small: 667px,
-    small-tablet: 1024px,
-    large-tablet: 1366px,
-    laptop: 1280px,
-    desktop: 1440px,
-    wide-screen: 1920px,
-  ),
-  portrait: (
-    small: 320px,
-    medium: 375px,
-    large: 414px,
-    small-tablet: 768px,
-    large-tablet: 1024px,
-    laptop: 1280px,
-    desktop: 1440px,
-    wide-screen: 1920px,
-  ),
+  base: 100%,
+  medium: 600px,
+  expanded: 840px,
+  large: 1200px,
+  extra-large: 1600px,
 ) !default;
+$containers: -extend('containers', $containers);
 
 /// ========================
 /// Grids
 /// ========================
 
-/// Default grid
+/// The layout grid of each width class (`base` is the base, below `medium`), from the Material 2
+/// responsive layout grid: 4 columns on a phone, 8 on a tablet, 12 from `expanded` on (Material 2
+/// puts it at 905px, the Material 3 `expanded` class starts at 840px). A class that is not here
+/// keeps the grid of the one before it (mobile first), so the grid only changes at `medium` and
+/// `expanded`. Material makes the margins scale on the large screens: the container does that.
 ///
-/// Defines the default number of cols for the grid system. A 12-column grid is commonly used in responsive design.
-$default-grid-columns: 1 !default;
-
-/// CSS grid configuration for each breakpoint.
-/// Defines the number of cols and gap sizes based on orientations and screen sizes.
-///
-/// Each breakpoint contains:
-/// - number of cols (e.g., 2, 3, 4, etc.)
-/// - gap size (spacing between cols) in `rem` units
+/// - `cols`: the number of columns
+/// - `gap`: the gutter between the columns
+/// - `margin`: the margin on the sides of the grid
 $grids: (
-  landscape: (
-    small: (
-      cols: 4,
-      gap: 16px,
-    ),
-    small-tablet: (
-      cols: 6,
-      gap: 24px,
-    ),
-    large-tablet: (
-      cols: 8,
-      gap: 32px,
-    ),
-    laptop: (
-      cols: 8,
-      gap: 32px,
-    ),
-    desktop: (
-      cols: 12,
-      gap: 32px,
-    ),
-    wide-screen: (
-      cols: 12,
-      gap: 32px,
-    ),
+  base: (
+    cols: 4,
+    gap: 16px,
+    margin: 16px,
   ),
-  portrait: (
-    small: (
-      cols: 2,
-      gap: 16px,
-    ),
-    medium: (
-      cols: 2,
-      gap: 16px,
-    ),
-    large: (
-      cols: 3,
-      gap: 16px,
-    ),
-    small-tablet: (
-      cols: 4,
-      gap: 24px,
-    ),
-    large-tablet: (
-      cols: 6,
-      gap: 32px,
-    ),
-    laptop: (
-      cols: 8,
-      gap: 32px,
-    ),
-    desktop: (
-      cols: 12,
-      gap: 32px,
-    ),
-    wide-screen: (
-      cols: 12,
-      gap: 32px,
-    ),
+  medium: (
+    cols: 8,
+    gap: 24px,
+    margin: 32px,
+  ),
+  expanded: (
+    cols: 12,
+    gap: 24px,
+    margin: 32px,
   ),
 ) !default;
+$grids: -extend('grids', $grids);
 
 /// ========================
 /// Spacings
@@ -244,25 +183,159 @@ $spacings: (
   48: 48px,
   xl: 48px,
 ) !default;
+$spacings: -extend('spacings', $spacings);
+
+/// ========================
+/// Layers
+/// ========================
+
+/// Defines the `z-index` of the layers that stack on the page, from the lowest to the highest.
+/// - `sticky`: bars that stay on the edge while scrolling
+/// - `floating`: buttons floating over the content
+/// - `banner`: notices pinned to the viewport
+/// - `overlay`: dialogs, drawers, skip links
+$z-index: (
+  sticky: 100,
+  floating: 800,
+  banner: 900,
+  overlay: 1000,
+) !default;
+$z-index: -extend('z-index', $z-index);
+
+/// ========================
+/// Motion
+/// ========================
+
+/// The durations of Material 3, by the area a transition crosses, plus `loop` for an animation that repeats.
+/// - `short1` to `short4` (50 to 200ms): small utility transitions, a state change
+/// - `medium1` to `medium4` (250 to 400ms): a transition across a medium area of the screen
+/// - `long1` to `long4` (450 to 600ms): large expressive transitions
+/// - `extra-long1` to `extra-long4` (700 to 1000ms): ambient transitions with no user input
+/// - `loop`: one turn of an animation that repeats (skeleton), not from Material
+$durations: (
+  short1: 50ms,
+  short2: 100ms,
+  short3: 150ms,
+  short4: 200ms,
+  medium1: 250ms,
+  medium2: 300ms,
+  medium3: 350ms,
+  medium4: 400ms,
+  long1: 450ms,
+  long2: 500ms,
+  long3: 550ms,
+  long4: 600ms,
+  extra-long1: 700ms,
+  extra-long2: 800ms,
+  extra-long3: 900ms,
+  extra-long4: 1000ms,
+  loop: 1400ms,
+) !default;
+$durations: -extend('durations', $durations);
+
+/// The easing curves of Material 3, as CSS `cubic-bezier()`. `standard` is for simple, small or
+/// utility transitions, `emphasized` for the expressive ones. Material gives no CSS curve for
+/// `emphasized` itself (a path that CSS cannot write): it falls back to `standard`, as it says.
+$easings: (
+  standard: cubic-bezier(0.2, 0, 0, 1),
+  standard-decelerate: cubic-bezier(0, 0, 0, 1),
+  standard-accelerate: cubic-bezier(0.3, 0, 1, 1),
+  emphasized: cubic-bezier(0.2, 0, 0, 1),
+  emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1),
+  emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15),
+) !default;
+$easings: -extend('easings', $easings);
+
+/// What each kind of movement uses by default. A value is a key of `$durations` or `$easings`,
+/// or a time. The component styles, `animations.scss` and `animate()` read it, so changing it here
+/// changes them all; a call can still give its own (`animate(fade-in, $duration: short2)`).
+/// - `enter`, `exit`: a large element (dialog, drawer) comes in slowly and decelerating, goes fast
+/// - `enter-small`, `exit-small`: the same for a small one (menu, popover, toast), in standard easing
+/// - `state`: a change of state (hover, a bar that fills)
+/// - `ripple-press`, `ripple-release`: the ripple of a press, from Material Web
+$motion: (
+  enter: (
+    duration: medium4,
+    easing: emphasized-decelerate,
+  ),
+  exit: (
+    duration: short4,
+    easing: emphasized-accelerate,
+  ),
+  enter-small: (
+    duration: medium1,
+    easing: standard-decelerate,
+  ),
+  exit-small: (
+    duration: short4,
+    easing: standard-accelerate,
+  ),
+  state: (
+    duration: short3,
+    easing: standard,
+  ),
+  ripple-press: (
+    duration: 105ms,
+  ),
+  ripple-release: (
+    duration: 375ms,
+  ),
+) !default;
+$motion: -extend('motion', $motion);
+
+/// ========================
+/// Focus
+/// ========================
+
+/// The focus ring of the component styles, in px (written in rem). Material 3 draws a 3dp ring;
+/// 2px with a 2px offset keeps it visible without crowding what it surrounds.
+$focus-ring: (
+  width: 2px,
+  offset: 2px,
+) !default;
+$focus-ring: -extend('focus-ring', $focus-ring);
+
+/// The keyframes of `animations.scss`, that `animate()` can use. In and out come in pairs.
+/// - `fade`, `scale` (from 90%), `slide-up`, `slide-down`, `slide-start`, `slide-end`: an element
+///   enters (`-in`) or leaves (`-out`). The slides follow the writing direction.
+/// - `spin`, `pulse`, `shake`: no in or out. A loader that turns, a call for attention, an error.
+$animations: (
+  fade-in,
+  fade-out,
+  scale-in,
+  scale-out,
+  slide-up-in,
+  slide-up-out,
+  slide-down-in,
+  slide-down-out,
+  slide-start-in,
+  slide-start-out,
+  slide-end-in,
+  slide-end-out,
+  spin,
+  pulse,
+  shake
+) !default;
 
 /// ========================
 /// Typography
 /// ========================
-
-/// Default font-size
-///
-/// Defines the default font-size.
-$default-font-size: 16px !default;
 
 /// Font family map
 /// ========================
 /// Defines the font families used throughout the design for consistency.
 /// - `sans`: Sans-serif fonts
 /// - `mono`: Monospaced fonts
+/// - `brand`: the typeface of the large styles of the type scale (`display`, `headline`, `title-large`)
+/// - `plain`: the typeface of the small styles (`title`, `body`, `label`), made to be read
+/// Material 3 sets both to Roboto: set them apart to give the large styles their own voice.
 $font-family: (
   sans: "'Helvetica Neue', arial, sans-serif",
   mono: "'Courier New', monospace",
+  brand: "'Helvetica Neue', arial, sans-serif",
+  plain: "'Helvetica Neue', arial, sans-serif",
 ) !default;
+$font-family: -extend('font-family', $font-family);
 
 /// Font weight map
 /// ========================
@@ -283,19 +356,21 @@ $font-weight: (
   bold: 700,
   extra-bold: 800,
   ultra-bold: 800,
-  "black": 900,
+  'black': 900,
   heavy: 900,
 ) !default;
+$font-weight: -extend('font-weight', $font-weight);
 
 /// Font size map
 /// ========================
-/// Defines the font sizes for various text elements in `rem` units.
-/// The base font size is `16px`, and other sizes are defined relative to it.
+/// Defines the font sizes for various text elements, in `px`: they are converted to `rem`
+/// from `$default-font-size` where they are used, so they follow the base font size.
 $font-size: (
+  11: 11px,
   12: 12px,
   14: 14px,
   16: 16px,
-  base: 16px,
+  base: config.$default-font-size,
   18: 18px,
   medium: 18px,
   20: 20px,
@@ -304,6 +379,7 @@ $font-size: (
   24: 24px,
   26: 26px,
   28: 28px,
+  30: 30px,
   32: 32px,
   34: 34px,
   36: 36px,
@@ -311,14 +387,17 @@ $font-size: (
   40: 40px,
   42: 42px,
   44: 44px,
+  45: 45px,
   46: 46px,
   48: 48px,
   50: 50px,
   52: 52px,
   54: 54px,
   56: 56px,
+  57: 57px,
   58: 58px,
 ) !default;
+$font-size: -extend('font-size', $font-size);
 
 /// Fluid typography
 /// ========================
@@ -338,7 +417,7 @@ $_ffs-16: 16;
   $_ffs-16: map.get($font-size, 16);
 }
 
-$_ffs-base: 16px;
+$_ffs-base: config.$default-font-size;
 
 @if map.has-key($font-size, base) {
   $_ffs-base: map.get($font-size, base);
@@ -449,6 +528,7 @@ $font-size-fluid: (
     max: $_ffs-34,
   ),
 ) !default;
+$font-size-fluid: -extend('font-size-fluid', $font-size-fluid);
 
 /// Line Heights
 /// ========================
@@ -462,262 +542,310 @@ $line-height: (
   16: 16px,
   large: 20px,
 ) !default;
+$line-height: -extend('line-height', $line-height);
 
 /// Letter spacing
 /// ========================
-/// Defines letters spacing for various text elements.
+/// The tracking values of the type scale, in px (converted to rem where they are used).
+/// A numeric key is the value in hundredths of a pixel, `neg-` for a negative one:
+/// `25` is `0.25px`, `neg-150` is `-1.5px`.
+///
+/// - `neg-25`, `0`, `10`, `15`, `25`, `40`, `50`: the tracking of the Material 3 type scale
+/// - `neg-150`, `neg-50`, `125`, `150`: the Material 2 values that Material 3 has no equivalent
+///   for (large headlines, button, overline)
+/// - `tight`, `wide`, `widest`: names for the common cases
 $letter-spacings: (
-  neg-one-half: -1.5px,
-  neg-one-fiftieth: -1.5px,
-  neg-one-fortieth: -1.4px,
-  neg-one-third: -1.33px,
-  neg-one-thirtieth: -1.3px,
-  neg-one-quarter: -1.25px,
-  neg-one-twentieth: -1.2px,
-  neg-one-tenth: -1.1px,
-  neg-one: -1px,
-  neg-ninetieth: -0.9px,
-  neg-eightieth: -0.8px,
-  neg-seventieth: -0.7px,
-  neg-two-thirds: -0.66px,
-  neg-sixtieth: -0.6px,
-  neg-half: -0.5px,
-  neg-fiftieth: -0.5px,
-  neg-fortieth: -0.4px,
-  neg-third: -0.33px,
-  neg-thirtieth: -0.3px,
-  neg-quarter: -0.25px,
-  neg-twentieth: -0.2px,
-  neg-tenth: -0.1px,
-  normal: 0px,
-  tenth: 0.1px,
-  twentieth: 0.2px,
-  quarter: 0.25px,
-  thirtieth: 0.3px,
-  third: 0.33px,
-  fortieth: 0.4px,
-  fiftieth: 0.5px,
-  half: 0.5px,
-  sixtieth: 0.6px,
-  two-thirds: 0.66px,
-  seventieth: 0.7px,
-  eightieth: 0.8px,
-  ninetieth: 0.9px,
-  one: 1px,
-  one-tenth: 1.1px,
-  one-twentieth: 1.2px,
-  one-quarter: 1.25px,
-  one-thirtieth: 1.3px,
-  one-third: 1.33px,
-  one-fortieth: 1.4px,
-  one-fiftieth: 1.5px,
-  one-half: 1.5px,
-  // Semantic aliases
+  neg-150: -1.5px,
+  neg-50: -0.5px,
+  neg-25: -0.25px,
+  0: 0px,
+  10: 0.1px,
+  15: 0.15px,
+  25: 0.25px,
+  40: 0.4px,
+  50: 0.5px,
+  125: 1.25px,
+  150: 1.5px,
   tight: -0.5px,
   wide: 0.5px,
-  wider: 1px,
   widest: 1.5px,
 ) !default;
+$letter-spacings: -extend('letter-spacings', $letter-spacings);
+
+/// Type scale
+/// ========================
+/// The 15 baseline styles of the Material 3 type scale, from the `md.sys.typescale` tokens:
+/// `display`, `headline`, `title`, `body` and `label`, each in `large`, `medium` and `small`.
+/// Sizes, line heights and tracking are in px, converted to rem where they are used, so they
+/// follow the base font size. The weight is the name of a key of `$font-weight`, the font the
+/// name of a key of `$font-family` (`brand` or `plain`). `emphasized-weight` is the weight of the
+/// emphasized style of the same role: one step heavier (the values are those of the
+/// `md.sys.typescale.emphasized.*` tokens, whose only difference with the baseline is the weight).
+/// Apply a style with `type()`, or `@extend %type-<role>`.
+$type-scale: (
+  display-large: (
+    font: brand,
+    size: 57px,
+    line-height: 64px,
+    tracking: -0.25px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  display-medium: (
+    font: brand,
+    size: 45px,
+    line-height: 52px,
+    tracking: 0px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  display-small: (
+    font: brand,
+    size: 36px,
+    line-height: 44px,
+    tracking: 0px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  headline-large: (
+    font: brand,
+    size: 32px,
+    line-height: 40px,
+    tracking: 0px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  headline-medium: (
+    font: brand,
+    size: 28px,
+    line-height: 36px,
+    tracking: 0px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  headline-small: (
+    font: brand,
+    size: 24px,
+    line-height: 32px,
+    tracking: 0px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  title-large: (
+    font: brand,
+    size: 22px,
+    line-height: 28px,
+    tracking: 0px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  title-medium: (
+    font: plain,
+    size: 16px,
+    line-height: 24px,
+    tracking: 0.15px,
+    weight: medium,
+    emphasized-weight: bold,
+  ),
+  title-small: (
+    font: plain,
+    size: 14px,
+    line-height: 20px,
+    tracking: 0.1px,
+    weight: medium,
+    emphasized-weight: bold,
+  ),
+  body-large: (
+    font: plain,
+    size: 16px,
+    line-height: 24px,
+    tracking: 0.5px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  body-medium: (
+    font: plain,
+    size: 14px,
+    line-height: 20px,
+    tracking: 0.25px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  body-small: (
+    font: plain,
+    size: 12px,
+    line-height: 16px,
+    tracking: 0.4px,
+    weight: normal,
+    emphasized-weight: medium,
+  ),
+  label-large: (
+    font: plain,
+    size: 14px,
+    line-height: 20px,
+    tracking: 0.1px,
+    weight: medium,
+    emphasized-weight: bold,
+  ),
+  label-medium: (
+    font: plain,
+    size: 12px,
+    line-height: 16px,
+    tracking: 0.5px,
+    weight: medium,
+    emphasized-weight: bold,
+  ),
+  label-small: (
+    font: plain,
+    size: 11px,
+    line-height: 16px,
+    tracking: 0.5px,
+    weight: medium,
+    emphasized-weight: bold,
+  ),
+) !default;
+$type-scale: -extend('type-scale', $type-scale);
 
 /// Headings Styles
 /// ========================
-/// Map defining styles for each heading level (h1 to h6).
-/// Includes margins, paddings, line height, font size, weight, and letter spacing.
+/// Map defining styles for each heading level (h1 to h6): margins, paddings, line height,
+/// weight and letter spacing. The text styles come from the Material 3 type scale: h1 to h3 are
+/// the `headline` styles (large, medium, small), h4 to h6 the `title` styles (large, medium, small).
+/// The font size is the fluid one, from `$font-size-fluid`.
 $headings: (
   1: (
-    line-height: map.get($line-height, base),
+    role: headline-large,
     margin: 0px 0px 16px 0px,
     padding: 0px,
-    spacing: -1.5px,
-    weight: map.get($font-weight, light),
   ),
   2: (
-    line-height: map.get($line-height, 3),
+    role: headline-medium,
     margin: 0px 0px 12px 0px,
     padding: 0px,
-    spacing: -0.5px,
-    weight: map.get($font-weight, light),
   ),
   3: (
-    line-height: map.get($line-height, 4),
+    role: headline-small,
     margin: 0px 0px 8px 0px,
     padding: 0px,
-    spacing: normal,
-    weight: map.get($font-weight, base),
   ),
   4: (
-    line-height: map.get($line-height, 5),
+    role: title-large,
     margin: 0px 0px 8px 0px,
     padding: 0px,
-    spacing: 0.25px,
-    weight: map.get($font-weight, base),
   ),
   5: (
-    line-height: map.get($line-height, 6),
+    role: title-medium,
     margin: 0px 0px 6px 0px,
     padding: 0px,
-    spacing: normal,
-    weight: map.get($font-weight, base),
   ),
   6: (
-    line-height: map.get($line-height, 6),
+    role: title-small,
     margin: 0px 0px 6px 0px,
     padding: 0px,
-    spacing: 0.25px,
-    weight: map.get($font-weight, bold),
   ),
 ) !default;
+$headings: -extend('headings', $headings);
 
 /// ========================
 /// Shapes
 /// ========================
-/// Defines border radius for different elements to control their rounded corners.
-/// Can be defined in pixels or percentage for circular elements.
+/// The corner radius scale of Material 3: ten steps, named for the roundness of the corner.
+/// Apply one to the four corners with `shape()`, or to a side (`top`, `end`...) with its second
+/// argument. `full` is a pill: a radius larger than any element, so the ends are always round.
 $shape-radius: (
-  0: 0px,
   none: 0px,
-  1: 4px,
   extra-small: 4px,
-  extra-small-top: 4px 4px 0 0,
-  extra-small-end: 0 4px 4px 0,
-  extra-small-bottom: 0 0 4px 4px,
-  extra-small-start: 4px 0 0 4px,
-  2: 8px,
-  3: 10px,
+  small: 8px,
   medium: 12px,
-  medium-top: 12px 12px 0 0,
-  medium-end: 0 12px 12px 0,
-  medium-bottom: 0 0 12px 12px,
-  medium-start: 12px 0 0 12px,
-  4: 16px,
-  5: 22px,
   large: 16px,
-  large-top: 16px 16px 0 0,
-  large-end: 0 16px 16px 0,
-  large-bottom: 0 0 16px 16px,
-  large-start: 16px 0 0 16px,
-  20: 20px,
-  20-top: 20px 20px 0 0,
-  20-end: 0 20px 20px 0,
-  20-bottom: 0 0 20px 20px,
-  20-start: 20px 0 0 20px,
-  6: 50%,
-  full: 50%,
-  full-top: 50% 50% 0 0,
-  full-end: 0 50% 50% 0,
-  full-bottom: 0 0 50% 50%,
-  full-start: 50% 0 0 50%,
+  large-increased: 20px,
+  extra-large: 28px,
+  extra-large-increased: 32px,
+  extra-extra-large: 48px,
+  full: 9999px,
 ) !default;
+$shape-radius: -extend('shape-radius', $shape-radius);
 
-/// ========================
-/// Elevations
-/// ========================
-/// Defines different shadow elevations for various UI components.
-/// The `alpha` values control the transparency, and `size` defines the spread and blur of the shadow.
+/// The elevation levels of Material 3, 0 to 5 (0, 1, 3, 6, 8 and 12dp), as the two layers of
+/// shadow that Material builds them from: a close, darker one (`1`) and a wide, lighter one (`2`).
+/// Each layer has the `size` of the shadow (`x y blur spread`), its `color` and its `alpha`.
+/// The shadows are those of the `md-elevation` component of Material Web.
+/// Use a level with `elevation()`; a surface rests on level 1 to 3.
 $elevations: (
   0: (
     1: (
       size: 0px 0px 0px 0px,
       color: #000,
-      alpha: 0.2,
+      alpha: 0.3,
     ),
     2: (
       size: 0px 0px 0px 0px,
       color: #000,
-      alpha: 0.14,
-    ),
-    3: (
-      size: 0px 0px 0px 0px,
-      color: #000,
-      alpha: 0.12,
+      alpha: 0.15,
     ),
   ),
   1: (
     1: (
-      size: 0px 2px 1px -1px,
+      size: 0px 1px 2px 0px,
       color: #000,
-      alpha: 0.2,
+      alpha: 0.3,
     ),
     2: (
-      size: 0px 1px 1px 0px,
+      size: 0px 1px 3px 1px,
       color: #000,
-      alpha: 0.14,
-    ),
-    3: (
-      size: 0px 1px 3px 0px,
-      color: #000,
-      alpha: 0.12,
+      alpha: 0.15,
     ),
   ),
   2: (
     1: (
-      size: 0px 3px 3px -2px,
+      size: 0px 1px 2px 0px,
       color: #000,
-      alpha: 0.2,
+      alpha: 0.3,
     ),
     2: (
-      size: 0px 3px 4px 0px,
+      size: 0px 2px 6px 2px,
       color: #000,
-      alpha: 0.14,
-    ),
-    3: (
-      size: 0px 1px 8px 0px,
-      color: #000,
-      alpha: 0.12,
+      alpha: 0.15,
     ),
   ),
   3: (
     1: (
-      size: 0px 3px 5px -1px,
+      size: 0px 1px 3px 0px,
       color: #000,
-      alpha: 0.2,
+      alpha: 0.3,
     ),
     2: (
-      size: 0px 6px 10px 0px,
+      size: 0px 4px 8px 3px,
       color: #000,
-      alpha: 0.14,
-    ),
-    3: (
-      size: 0px 1px 18px 0px,
-      color: #000,
-      alpha: 0.12,
+      alpha: 0.15,
     ),
   ),
   4: (
     1: (
-      size: 0px 5px 5px -3px,
+      size: 0px 2px 3px 0px,
       color: #000,
-      alpha: 0.2,
+      alpha: 0.3,
     ),
     2: (
-      size: 0px 8px 10px 1px,
+      size: 0px 6px 10px 4px,
       color: #000,
-      alpha: 0.14,
-    ),
-    3: (
-      size: 0px 3px 14px 2px,
-      color: #000,
-      alpha: 0.12,
+      alpha: 0.15,
     ),
   ),
   5: (
     1: (
-      size: 0px 7px 8px -4px,
+      size: 0px 4px 4px 0px,
       color: #000,
-      alpha: 0.2,
+      alpha: 0.3,
     ),
     2: (
-      size: 0px 12px 17px 2px,
+      size: 0px 8px 12px 6px,
       color: #000,
-      alpha: 0.14,
-    ),
-    3: (
-      size: 0px 5px 22px 4px,
-      color: #000,
-      alpha: 0.12,
+      alpha: 0.15,
     ),
   ),
 ) !default;
+$elevations: -extend('elevations', $elevations);
 
 /// ========================
 /// Colors
@@ -1022,7 +1150,8 @@ $colors: (
   white: (
     default: #fff,
   ),
-);
+) !default;
+$colors: -extend('colors', $colors);
 
 /// ========================
 /// States
@@ -1030,18 +1159,21 @@ $colors: (
 $states: (
   state-hover-state-layer-opacity: 0.08,
   state-hover-state-layer-opacity-forced: 0.2,
-  state-focus-state-layer-opacity: 0.1,
-  state-pressed-state-layer-opacity: 0.1,
+  state-focus-state-layer-opacity: 0.12,
+  state-pressed-state-layer-opacity: 0.12,
+  state-dragged-state-layer-opacity: 0.16,
   state-disabled-opacity: 0.38,
   state-disabled-outline-opacity: 0.12,
   state-disabled-container-opacity: 0.04,
-);
+) !default;
+$states: -extend('states', $states);
 $opacity: (
   disabled: 0.38,
-);
+) !default;
+$opacity: -extend('opacity', $opacity);
 
 /// ========================
-/// Theme — Semantic color tokens
+/// Theme - Semantic color tokens
 /// ========================
 /// Default semantic token → Material palette mapping.
 /// Override before @use to change individual tokens, or pass overrides to mx.generate-theme().
@@ -1075,3 +1207,176 @@ $theme: (
   // #f44336
   on-error: map.get(map.get($colors, white), default), // #fff
 ) !default;
+$theme: -extend('theme', $theme);
+
+/// The roles of Material 3 that come from the colors of the theme, with the tone of each in the
+/// light and the dark mode (Material's baseline values). A role is `(source, tone)`: `primary`,
+/// `secondary` and `error` are the colors of `$theme`, `neutral` is a grey. `color-tone()` gives
+/// the color: a container is tone 90 of its color in the light mode and 30 in the dark mode, the
+/// text on it is tone 10 and 90. `generate-theme()` writes them with the tokens of `$theme`.
+$theme-roles: (
+  light: (
+    primary-container: (
+      primary,
+      90,
+    ),
+    on-primary-container: (
+      primary,
+      10,
+    ),
+    secondary-container: (
+      secondary,
+      90,
+    ),
+    on-secondary-container: (
+      secondary,
+      10,
+    ),
+    error-container: (
+      error,
+      90,
+    ),
+    on-error-container: (
+      error,
+      10,
+    ),
+    surface-dim: (
+      neutral,
+      87,
+    ),
+    surface-bright: (
+      neutral,
+      98,
+    ),
+    surface-container-lowest: (
+      neutral,
+      100,
+    ),
+    surface-container-low: (
+      neutral,
+      96,
+    ),
+    surface-container: (
+      neutral,
+      94,
+    ),
+    surface-container-high: (
+      neutral,
+      92,
+    ),
+    surface-container-highest: (
+      neutral,
+      90,
+    ),
+    surface-variant: (
+      neutral,
+      90,
+    ),
+    on-surface-variant: (
+      neutral,
+      30,
+    ),
+    outline: (
+      neutral,
+      50,
+    ),
+    outline-variant: (
+      neutral,
+      80,
+    ),
+    inverse-surface: (
+      neutral,
+      20,
+    ),
+    inverse-on-surface: (
+      neutral,
+      95,
+    ),
+  ),
+  dark: (
+    primary-container: (
+      primary,
+      30,
+    ),
+    on-primary-container: (
+      primary,
+      90,
+    ),
+    secondary-container: (
+      secondary,
+      30,
+    ),
+    on-secondary-container: (
+      secondary,
+      90,
+    ),
+    error-container: (
+      error,
+      30,
+    ),
+    on-error-container: (
+      error,
+      90,
+    ),
+    surface-dim: (
+      neutral,
+      6,
+    ),
+    surface-bright: (
+      neutral,
+      24,
+    ),
+    surface-container-lowest: (
+      neutral,
+      4,
+    ),
+    surface-container-low: (
+      neutral,
+      10,
+    ),
+    surface-container: (
+      neutral,
+      12,
+    ),
+    surface-container-high: (
+      neutral,
+      17,
+    ),
+    surface-container-highest: (
+      neutral,
+      22,
+    ),
+    surface-variant: (
+      neutral,
+      30,
+    ),
+    on-surface-variant: (
+      neutral,
+      80,
+    ),
+    outline: (
+      neutral,
+      60,
+    ),
+    outline-variant: (
+      neutral,
+      30,
+    ),
+    inverse-surface: (
+      neutral,
+      90,
+    ),
+    inverse-on-surface: (
+      neutral,
+      20,
+    ),
+  ),
+) !default;
+$theme-roles: -extend('theme-roles', $theme-roles);
+
+// A name in `$overrides` that is not a map of this file is a typo: say it.
+@each $-name in map.keys(config.$overrides) {
+  @if not list.index($-extended, $-name) {
+    @warn "$overrides: '#{$-name}' is not a map of mithril-scss, it is ignored.";
+  }
+}

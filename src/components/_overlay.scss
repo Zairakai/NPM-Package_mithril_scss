@@ -1,4 +1,4 @@
-@use "shared";
+@use 'shared';
 
 .modal {
   @include shared.surface(3);
@@ -10,49 +10,54 @@
     background: var(--zk-scrim);
   }
 
+  // A dialog fades and grows in, and goes the other way out. `@starting-style` gives the
+  // state it starts from, `allow-discrete` lets `display` wait for the end of the exit.
+  &:is(dialog) {
+    @include shared.overlay-motion;
+  }
+
   &:not(dialog) {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: shared.layer(overlay);
     block-size: fit-content;
     margin: auto;
   }
 
-  &-header {
+  @include shared.element(header) {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     padding: var(--zk-space-3);
     border-bottom: 1px solid var(--zk-border);
   }
 
-  &-title {
+  @include shared.element(title) {
     margin: 0;
     font-size: 1.125em;
   }
 
-  &-body,
-  &-content {
+  @include shared.element(body, content) {
     padding: var(--zk-space-3);
   }
 
-  &-footer {
+  @include shared.element(footer) {
     display: flex;
-    gap: var(--zk-space-2);
     justify-content: flex-end;
+    gap: var(--zk-space-2);
     padding: var(--zk-space-3);
     border-top: 1px solid var(--zk-border);
   }
 
-  &-close {
+  @include shared.element(close) {
     @include shared.ghost-button;
   }
 }
 
 .dialog-actions {
   display: flex;
-  gap: var(--zk-space-2);
   justify-content: flex-end;
+  gap: var(--zk-space-2);
   margin-block-start: var(--zk-space-3);
 }
 
@@ -64,6 +69,10 @@
   &::backdrop {
     background: var(--zk-scrim);
   }
+
+  &:is(dialog) {
+    @include shared.overlay-motion(inline-end);
+  }
 }
 
 .popover,
@@ -73,14 +82,18 @@
   @include shared.surface(2);
 
   padding: var(--zk-space-2);
+
+  &[popover] {
+    @include shared.overlay-motion($small: true, $open: ':popover-open');
+  }
 }
 
 .tooltip {
   padding: var(--zk-space-1) var(--zk-space-2);
+  border-color: transparent;
   font-size: 0.8125em;
   color: var(--surface);
   background: var(--on-surface);
-  border-color: transparent;
 }
 
 .dropdown-menu,
@@ -90,7 +103,7 @@
 }
 
 .dropdown-item,
-.context-menu [role="menuitem"] {
+.context-menu [role='menuitem'] {
   @include shared.ghost-button;
 
   display: block;
@@ -99,7 +112,7 @@
 }
 
 .dropdown-item:focus,
-.context-menu [role="menuitem"]:focus {
-  background: var(--zk-pressed);
+.context-menu [role='menuitem']:focus {
   outline: none;
+  background: var(--zk-pressed);
 }

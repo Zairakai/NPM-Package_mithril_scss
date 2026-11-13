@@ -1,9 +1,9 @@
-@use "shared";
+@use 'shared';
 
 .carousel {
   position: relative;
 
-  &-track {
+  @include shared.element(track) {
     border-radius: var(--zk-radius-lg);
 
     &:focus-visible {
@@ -11,45 +11,44 @@
     }
   }
 
-  &-previous,
-  &-next {
+  @include shared.element(previous, next) {
     @include shared.ghost-button;
 
     position: absolute;
     inset-block-start: 50%;
+    border-radius: 50%;
     color: var(--surface);
     background: rgb(0 0 0 / 50%);
-    border-radius: 50%;
     transform: translateY(-50%);
   }
 
-  &-previous {
+  @include shared.element(previous) {
     inset-inline-start: var(--zk-space-2);
   }
 
-  &-next {
+  @include shared.element(next) {
     inset-inline-end: var(--zk-space-2);
   }
 
-  &-indicators {
+  @include shared.element(indicators) {
     position: absolute;
     inset-block-end: var(--zk-space-2);
     inset-inline: 0;
     display: flex;
-    gap: var(--zk-space-2);
     justify-content: center;
+    gap: var(--zk-space-2);
   }
 
-  &-indicator {
+  @include shared.element(indicator) {
     inline-size: 0.6rem;
     block-size: 0.6rem;
     padding: 0;
-    cursor: pointer;
-    background: rgb(255 255 255 / 60%);
     border: 0;
     border-radius: 50%;
+    background: rgb(255 255 255 / 60%);
+    cursor: pointer;
 
-    &[aria-current="true"] {
+    &[aria-current='true'] {
       background: var(--primary);
     }
   }
@@ -59,19 +58,19 @@
   display: inline-block;
   overflow: hidden;
 
-  &[data-state="loading"] {
+  &[data-state='loading'] {
     background: var(--zk-hover);
   }
 
-  &-img {
+  @include shared.element(img) {
     max-inline-size: 100%;
     block-size: auto;
   }
 
-  &-error {
+  @include shared.element(error) {
     display: inline-flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     min-inline-size: 6rem;
     min-block-size: 4rem;
     padding: var(--zk-space-2);
@@ -81,7 +80,7 @@
 }
 
 .lightbox {
-  &-thumbnails {
+  @include shared.element(thumbnails) {
     display: flex;
     flex-wrap: wrap;
     gap: var(--zk-space-2);
@@ -89,12 +88,12 @@
     list-style: none;
   }
 
-  &-thumbnail {
+  @include shared.element(thumbnail) {
     padding: 0;
-    cursor: zoom-in;
-    background: transparent;
     border: 0;
     border-radius: var(--zk-radius);
+    background: transparent;
+    cursor: zoom-in;
 
     img {
       display: block;
@@ -106,11 +105,11 @@
     }
   }
 
-  &-dialog {
+  @include shared.element(dialog) {
     max-inline-size: min(60rem, 96vw);
   }
 
-  &-figure {
+  @include shared.element(figure) {
     margin: 0;
 
     &:focus-visible {
@@ -118,27 +117,26 @@
     }
   }
 
-  &-image {
+  @include shared.element(image) {
     max-inline-size: 100%;
     max-block-size: 70vh;
     margin-inline: auto;
   }
 
-  &-caption {
+  @include shared.element(caption) {
     padding: var(--zk-space-2);
-    color: var(--zk-muted);
     text-align: center;
+    color: var(--zk-muted);
   }
 
-  &-controls {
+  @include shared.element(controls) {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     padding: var(--zk-space-2);
   }
 
-  &-previous,
-  &-next {
+  @include shared.element(previous, next) {
     @include shared.ghost-button;
   }
 }
@@ -146,30 +144,28 @@
 .player {
   position: relative;
 
-  &-media {
+  @include shared.element(media) {
     inline-size: 100%;
     background: #000;
   }
 
-  &-controls {
+  @include shared.element(controls) {
     display: flex;
-    gap: var(--zk-space-2);
     align-items: center;
+    gap: var(--zk-space-2);
     padding: var(--zk-space-2);
     background: var(--surface);
   }
 
-  &-seek {
+  @include shared.element(seek) {
     flex: 1;
   }
 
-  &-play,
-  &-mute,
-  &-fullscreen {
+  @include shared.element(play, mute, fullscreen) {
     @include shared.ghost-button;
   }
 
-  &-speed {
+  @include shared.element(speed) {
     @include shared.field;
   }
 }

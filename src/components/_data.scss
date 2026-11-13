@@ -1,4 +1,4 @@
-@use "shared";
+@use 'shared';
 
 .data-table-wrapper {
   display: flex;
@@ -19,14 +19,14 @@
   th,
   td {
     padding: var(--zk-space-2) var(--zk-space-3);
-    text-align: start;
     border-bottom: 1px solid var(--zk-border);
+    text-align: start;
 
-    &[data-align="end"] {
+    &[data-align='end'] {
       text-align: end;
     }
 
-    &[data-align="center"] {
+    &[data-align='center'] {
       text-align: center;
     }
   }
@@ -40,7 +40,7 @@
     background: var(--zk-hover);
   }
 
-  tbody tr[aria-selected="true"] {
+  tbody tr[aria-selected='true'] {
     background: var(--zk-pressed);
   }
 
@@ -48,58 +48,58 @@
     opacity: 0.6;
   }
 
-  &-sort {
+  @include shared.element(sort) {
     @include shared.ghost-button;
 
     font-weight: inherit;
 
     &::after {
+      content: '↕';
       margin-inline-start: var(--zk-space-1);
-      content: "↕";
       opacity: 0.4;
     }
   }
 
-  th[aria-sort="ascending"] &-sort::after {
-    content: "↑";
+  th[aria-sort='ascending'] &#{shared.part(sort)}::after {
+    content: '↑';
     opacity: 1;
   }
 
-  th[aria-sort="descending"] &-sort::after {
-    content: "↓";
+  th[aria-sort='descending'] &#{shared.part(sort)}::after {
+    content: '↓';
     opacity: 1;
   }
 
-  &-empty td {
+  &#{shared.part(empty)} td {
     padding: var(--zk-space-4);
-    color: var(--zk-muted);
     text-align: center;
+    color: var(--zk-muted);
   }
 
-  &-search form {
+  &#{shared.part(search)} form {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--zk-space-3);
     align-items: flex-end;
+    gap: var(--zk-space-3);
   }
 
-  &-filter {
+  @include shared.element(filter) {
     display: flex;
     flex-direction: column;
     gap: var(--zk-space-1);
   }
 
-  &-search input,
-  &-search select {
+  &#{shared.part(search)} input,
+  &#{shared.part(search)} select {
     @include shared.field;
   }
 
-  &-range {
+  @include shared.element(range) {
     display: flex;
     gap: var(--zk-space-1);
   }
 
-  &-clear {
+  @include shared.element(clear) {
     @include shared.ghost-button;
 
     border: 1px solid var(--zk-border-strong);
@@ -107,20 +107,20 @@
 }
 
 .sortable {
-  &-list {
-    padding: 0;
+  @include shared.element(list) {
     margin: 0;
+    padding: 0;
     list-style: none;
   }
 
-  &-item {
+  @include shared.element(item) {
     display: flex;
-    gap: var(--zk-space-2);
     align-items: center;
+    gap: var(--zk-space-2);
     padding: var(--zk-space-2);
-    background: var(--surface);
     border: 1px solid var(--zk-border);
     border-radius: var(--zk-radius);
+    background: var(--surface);
 
     &[data-grabbed],
     &[data-dragging] {
@@ -129,19 +129,19 @@
     }
   }
 
-  &-handle {
+  @include shared.element(handle) {
     @include shared.ghost-button;
 
     cursor: grab;
     touch-action: none;
   }
 
-  &-status {
+  @include shared.element(status) {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
-    overflow: hidden;
     clip-path: inset(50%);
+    overflow: hidden;
   }
 }
 
@@ -152,6 +152,6 @@
 .infinite-scroll-loading,
 .infinite-scroll-finished {
   padding: var(--zk-space-3);
-  color: var(--zk-muted);
   text-align: center;
+  color: var(--zk-muted);
 }

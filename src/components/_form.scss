@@ -1,57 +1,58 @@
-@use "shared";
+@use 'shared';
 
 .combobox {
-  &-control {
+  @include shared.element(control) {
     display: flex;
     flex-wrap: wrap;
     gap: var(--zk-space-1);
     padding: var(--zk-space-1);
-    background: var(--surface);
     border: 1px solid var(--zk-border-strong);
     border-radius: var(--zk-radius);
+    background: var(--surface);
 
     &:focus-within {
       border-color: var(--zk-focus);
-      outline: 2px solid var(--zk-focus);
+
+      @include shared.focus-ring($offset: 0);
     }
   }
 
-  &-input {
+  @include shared.element(input) {
     flex: 1;
     min-inline-size: 6rem;
+    border: 0;
     font: inherit;
     color: inherit;
     background: transparent;
-    border: 0;
 
     &:focus {
       outline: none;
     }
   }
 
-  &-chip {
+  @include shared.element(chip) {
     display: inline-flex;
     align-items: center;
-    background: var(--zk-pressed);
     border-radius: 999px;
+    background: var(--zk-pressed);
   }
 
-  &-chip-label {
+  @include shared.element(chip-label) {
     padding-inline: var(--zk-space-2);
   }
 
-  &-chip-remove {
+  @include shared.element(chip-remove) {
     @include shared.ghost-button;
 
     padding: 0 var(--zk-space-2);
     border-radius: 999px;
   }
 
-  &-list {
+  @include shared.element(list) {
     @include shared.surface(2);
   }
 
-  &-option {
+  @include shared.element(option) {
     padding: var(--zk-space-2) var(--zk-space-3);
     cursor: pointer;
 
@@ -59,17 +60,17 @@
       background: var(--zk-pressed);
     }
 
-    &[aria-selected="true"] {
+    &[aria-selected='true'] {
       font-weight: 600;
     }
 
-    &[aria-disabled="true"] {
-      cursor: not-allowed;
+    &[aria-disabled='true'] {
       opacity: 0.38;
+      cursor: not-allowed;
     }
   }
 
-  &-empty {
+  @include shared.element(empty) {
     padding: var(--zk-space-3);
     color: var(--zk-muted);
   }
@@ -79,22 +80,21 @@
   display: inline-block;
   padding: var(--zk-space-2);
 
-  &-header {
+  @include shared.element(header) {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
   }
 
-  &-title {
+  @include shared.element(title) {
     font-weight: 600;
   }
 
-  &-previous,
-  &-next {
+  @include shared.element(previous, next) {
     @include shared.ghost-button;
   }
 
-  &-grid {
+  @include shared.element(grid) {
     border-collapse: collapse;
 
     th {
@@ -108,7 +108,7 @@
     }
   }
 
-  &-day {
+  @include shared.element(day) {
     @include shared.ghost-button;
 
     inline-size: 2.25rem;
@@ -125,8 +125,8 @@
     }
 
     &[data-in-range] {
-      background: rgb(var(--primary-rgb) / 16%);
       border-radius: 0;
+      background: rgb(var(--primary-rgb) / 16%);
     }
 
     &[data-selected] {
@@ -137,21 +137,20 @@
 }
 
 .datepicker {
-  &-control {
+  @include shared.element(control) {
     display: flex;
     gap: var(--zk-space-1);
   }
 
-  &-input {
+  @include shared.element(input) {
     @include shared.field;
   }
 
-  &-toggle,
-  &-clear {
+  @include shared.element(toggle, clear) {
     @include shared.ghost-button;
   }
 
-  &-panel {
+  @include shared.element(panel) {
     @include shared.surface(2);
   }
 }
@@ -161,8 +160,7 @@
   display: flex;
   flex-direction: column;
 
-  &-low,
-  &-high {
+  @include shared.element(low, high) {
     accent-color: var(--primary);
   }
 }
@@ -171,7 +169,7 @@
   display: flex;
   gap: var(--zk-space-2);
 
-  &-digit {
+  @include shared.element(digit) {
     @include shared.field;
 
     inline-size: 2.5rem;
@@ -181,8 +179,8 @@
 
 .time-picker {
   display: inline-flex;
-  gap: var(--zk-space-1);
   align-items: center;
+  gap: var(--zk-space-1);
 
   select {
     @include shared.field;
@@ -190,7 +188,7 @@
 }
 
 .tags-input {
-  &-list {
+  @include shared.element(list) {
     display: inline-flex;
     flex-wrap: wrap;
     gap: var(--zk-space-1);
@@ -198,25 +196,25 @@
     list-style: none;
   }
 
-  &-tag {
+  @include shared.element(tag) {
     display: inline-flex;
     align-items: center;
-    background: var(--zk-pressed);
     border-radius: 999px;
+    background: var(--zk-pressed);
   }
 
-  &-tag-label {
+  @include shared.element(tag-label) {
     padding-inline: var(--zk-space-2);
   }
 
-  &-remove {
+  @include shared.element(remove) {
     @include shared.ghost-button;
 
     padding: 0 var(--zk-space-2);
     border-radius: 999px;
   }
 
-  &-field {
+  @include shared.element(field) {
     @include shared.field;
   }
 }
@@ -224,98 +222,97 @@
 .color-picker {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--zk-space-2);
   align-items: center;
+  gap: var(--zk-space-2);
 
-  &-hex {
+  @include shared.element(hex) {
     @include shared.field;
 
     inline-size: 8rem;
     font-family: ui-monospace, Menlo, Consolas, monospace;
   }
 
-  &-palette {
+  @include shared.element(palette) {
     display: flex;
     gap: var(--zk-space-1);
     padding: 0;
     list-style: none;
   }
 
-  &-swatch {
+  @include shared.element(swatch) {
     inline-size: 1.5rem;
     block-size: 1.5rem;
-    cursor: pointer;
     border: 1px solid var(--zk-border-strong);
     border-radius: 50%;
+    cursor: pointer;
 
-    &[aria-pressed="true"] {
-      outline: 2px solid var(--zk-focus);
-      outline-offset: 2px;
+    &[aria-pressed='true'] {
+      @include shared.focus-ring;
     }
   }
 }
 
 .file-dropzone {
-  &-area {
+  @include shared.element(area) {
     display: flex;
     flex-direction: column;
-    gap: var(--zk-space-2);
     align-items: center;
+    gap: var(--zk-space-2);
     padding: var(--zk-space-4);
-    color: var(--zk-muted);
-    text-align: center;
     border: 2px dashed var(--zk-border-strong);
     border-radius: var(--zk-radius-lg);
+    text-align: center;
+    color: var(--zk-muted);
   }
 
-  &[data-dragging] &-area {
-    background: rgb(var(--primary-rgb) / 8%);
+  &[data-dragging] &#{shared.part(area)} {
     border-color: var(--primary);
+    background: rgb(var(--primary-rgb) / 8%);
   }
 
   &[data-disabled] {
     opacity: 0.38;
   }
 
-  &-browse {
+  @include shared.element(browse) {
     @include shared.ghost-button;
 
-    color: var(--primary);
     text-decoration: underline;
+    color: var(--primary);
   }
 
-  &-errors {
+  @include shared.element(errors) {
     color: var(--error);
   }
 
-  &-files {
+  @include shared.element(files) {
     padding: 0;
     list-style: none;
   }
 
-  &-file {
+  @include shared.element(file) {
     display: flex;
-    gap: var(--zk-space-2);
     align-items: center;
+    gap: var(--zk-space-2);
     padding: var(--zk-space-1) 0;
   }
 
-  &-preview {
+  @include shared.element(preview) {
     inline-size: 2.5rem;
     block-size: 2.5rem;
-    object-fit: cover;
     border-radius: var(--zk-radius);
+    object-fit: cover;
   }
 
-  &-name {
+  @include shared.element(name) {
     flex: 1;
   }
 
-  &-size {
+  @include shared.element(size) {
     color: var(--zk-muted);
   }
 
-  &-remove {
+  @include shared.element(remove) {
     @include shared.ghost-button;
   }
 }
