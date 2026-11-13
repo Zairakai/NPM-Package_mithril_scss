@@ -9,14 +9,23 @@ const src = resolve(here, '../../src')
 const out = resolve(here, '../reference')
 
 const files = {
+  config: ['config.scss', 'Configuration', 'The settings: base font size, default grid, element separator. Set them with `@use ... with (...)`.'],
   functions: ['functions.scss', 'Functions', 'Sass functions: colors, units, lookups in the tokens.'],
   mixins: ['mixins.scss', 'Mixins', 'Sass mixins: media queries, grid, spacing, theme and export of CSS variables.'],
   variables: [
     'variables.scss',
     'Variables',
-    'The design tokens. Every one is `!default`: override it before the first `@use`.',
+    'The design tokens, and `vars()` to reference them. Every token is `!default`: override it before the first `@use`. The settings are in the configuration page.',
   ],
   placeholders: ['placeholders.scss', 'Placeholders', 'Placeholders to `@extend`: flex, grid, typography.'],
+}
+
+// An example without the indentation that its comment gives to every line.
+function dedent(text) {
+  const lines = text.split('\n')
+  const indent = Math.min(...lines.filter((line) => line.trim()).map((line) => /^ */.exec(line)[0].length))
+
+  return lines.map((line) => line.slice(indent)).join('\n').trim()
 }
 
 // The text of a comment block, without the separators (=====) and the leading slashes.
@@ -39,7 +48,7 @@ function parseBlock(lines) {
 
     if (tag) {
       if ('example' === mode && example.length) {
-        examples.push(example.join('\n').trim())
+        examples.push(dedent(example.join('\n')))
         example = []
       }
 
@@ -55,7 +64,7 @@ function parseBlock(lines) {
         returns = tag[2].replace(/^\{[^}]+\}\s*-?\s*/, '')
       } else if ('throws' === tag[1]) {
         throws = tag[2]
-      } else if ('example' === tag[1] && tag[2]) {
+      } else if ('example' === tag[1] && tag[2] && !/^(?:scss|sass|css)$/.test(tag[2])) {
         example.push(tag[2])
       }
     } else if ('example' === mode) {
@@ -66,7 +75,7 @@ function parseBlock(lines) {
   }
 
   if (example.length) {
-    examples.push(example.join('\n').trim())
+    examples.push(dedent(example.join('\n')))
   }
 
   return { description: description.join('\n').trim(), params, returns, throws, examples }
@@ -89,8 +98,8 @@ function entriesOf(file, kind) {
         ? /^@function ([\w-]+)\((.*)\)\s*\{/.exec(line)
         : 'mixins' === kind
           ? /^@mixin ([\w-]+)(?:\((.*)\))?\s*\{/.exec(line)
-          : 'variables' === kind
-            ? /^\$([\w-]+):/.exec(line)
+          : ('variables' === kind || 'config' === kind)
+            ? (/^\$([\w-]+):/.exec(line) ?? /^@function ([\w-]+)\((.*)\)\s*\{/.exec(line))
             : /^%([\w-]+)\s*\{/.exec(line)
 
     if (match && block.length) {
@@ -125,7 +134,7 @@ for (const [kind, [file, title, summary]] of Object.entries(files)) {
 
   for (const entry of entries) {
     const heading =
-      'functions' === kind || 'mixins' === kind
+      'functions' === kind || 'mixins' === kind || entry.signature !== undefined
         ? `${entry.name}(${entry.signature ?? ''})`
         : 'placeholders' === kind
           ? `%${entry.name}`

@@ -76,6 +76,8 @@ export default defineConfig({
           { text: 'Tokens and theming', link: '/guide/tokens' },
           { text: 'Component styles', link: '/guide/components' },
           { text: 'Grid and spacing', link: '/guide/grid-and-spacing' },
+          { text: 'Typography', link: '/guide/typography' },
+          { text: 'Motion and animations', link: '/guide/animations' },
           { text: 'Gallery', link: '/guide/gallery' },
         ],
       },
