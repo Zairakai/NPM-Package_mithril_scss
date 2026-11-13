@@ -20,10 +20,10 @@
     $corners: MithrilFunctions.corners-cut-symmetry($values, $symmetry);
   }
 
-  $top-left: map.get($corners, top-left, 0);
-  $top-right: map.get($corners, top-right, 0);
-  $bottom-right: map.get($corners, bottom-right, 0);
-  $bottom-left: map.get($corners, bottom-left, 0);
+  $top-left: map.get($corners, top-left) or 0;
+  $top-right: map.get($corners, top-right) or 0;
+  $bottom-right: map.get($corners, bottom-right) or 0;
+  $bottom-left: map.get($corners, bottom-left) or 0;
 
   // prettier-ignore
   clip-path: polygon(

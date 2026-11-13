@@ -426,9 +426,9 @@
 /// @param {boolean} $as-rgb - If true, the color is returned in RGB format. Defaults to true, meaning the color will be returned as `rgb(red green blue)`.
 /// @return {color, list} - The color with transparency applied in either `rgb` format or as a list of red, green, and blue channels.
 @function color-rgb($color, $as-rgb: true) {
-  $red: color.channel($color, "red");
-  $green: color.channel($color, "green");
-  $blue: color.channel($color, "blue");
+  $red: color.channel($color, "red", $space: rgb);
+  $green: color.channel($color, "green", $space: rgb);
+  $blue: color.channel($color, "blue", $space: rgb);
 
   @if true == $as-rgb {
     @return rgb($red $green $blue);
@@ -445,9 +445,13 @@
 /// @param {number} $opacity - The desired opacity level, from 0% (fully transparent) to 100% (fully opaque). Defaults to 50%.
 /// @return {color} - The color with the specified alpha value applied in RGBA format.
 @function color-alpha($color, $opacity: 50%) {
-  $color-map: color-rgb($color, false);
+  $alpha: $opacity;
 
-  @return rgb(map.get($color-map, red) map.get($color-map, green) map.get($color-map, blue) / $opacity);
+  @if "%" == math.unit($opacity) {
+    $alpha: math.div($opacity, 100%);
+  }
+
+  @return color.change($color, $alpha: $alpha);
 }
 
 /// Calculates the fluid font size based on the viewport width using the `clamp()` function.
