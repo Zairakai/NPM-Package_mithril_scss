@@ -22,7 +22,9 @@ describe('component styles', () => {
   it('writes the tokens for light and for dark', () => {
     expect(css).toMatch(/:root\s*{[^}]*--primary:/)
     expect(css).toMatch(/:root\[data-theme=dark]\s*{[^}]*--surface: #1e1e1e/)
-    expect(css).toMatch(/@media \(prefers-color-scheme: dark\)\s*{\s*:root:not\(\[data-theme=light]\)/)
+    expect(css).toMatch(
+      /@media \(prefers-color-scheme: dark\)\s*{\s*:root:not\(\[data-theme=light]\)/,
+    )
     expect(css).toContain('color-scheme: dark')
     expect(css).toContain('--primary-rgb')
   })
@@ -51,7 +53,9 @@ describe('component styles', () => {
   })
 
   it('respects the visitors who want less motion', () => {
-    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*{\s*\.skeleton\s*{\s*animation: none/)
+    expect(css).toMatch(
+      /@media \(prefers-reduced-motion: reduce\)\s*{\s*\.skeleton\s*{\s*animation: none/,
+    )
   })
 
   it('can leave the tokens to the application', () => {
@@ -63,7 +67,7 @@ describe('component styles', () => {
 
   it('can change the dark palette', () => {
     const custom = compile(
-      '@use "src/components" with ($dark-theme: (primary: #ff5722, on-primary: #000, surface: #000, on-surface: #fff, background: #000, on-background: #fff, error: #f00, on-error: #fff));'
+      '@use "src/components" with ($dark-theme: (primary: #ff5722, on-primary: #000, surface: #000, on-surface: #fff, background: #000, on-background: #fff, error: #f00, on-error: #fff));',
     )
 
     expect(custom).toMatch(/--primary: #ff5722/)
@@ -80,8 +84,12 @@ describe('scoped component styles', () => {
   })
 
   it('writes the dark tokens under the scope', () => {
-    expect(scoped).toMatch(/:root\[data-theme=dark] \.demo\s*{[^}]*--surface: #1e1e1e/)
-    expect(scoped).toMatch(/:root:not\(\[data-theme=light]\) \.demo\s*{[^}]*--surface: #1e1e1e/)
+    expect(scoped).toMatch(
+      /:root\[data-theme=dark] \.demo\s*{[^}]*--surface: #1e1e1e/,
+    )
+    expect(scoped).toMatch(
+      /:root:not\(\[data-theme=light]\) \.demo\s*{[^}]*--surface: #1e1e1e/,
+    )
   })
 
   it('writes the rules of the components under the scope only', () => {
@@ -94,17 +102,146 @@ describe('scoped component styles', () => {
 describe('exports of the package', () => {
   const resolve = createRequire(import.meta.url).resolve
 
-  it.each(['functions', 'mixins', 'variables', 'placeholders', 'grid', 'spacing'])(
-    'exposes src/%s, with and without the extension',
-    (name) => {
-      expect(resolve(`@zairakai/mithril-scss/src/${name}`)).toMatch(new RegExp(`src/${name}\\.scss$`))
-      expect(resolve(`@zairakai/mithril-scss/src/${name}.scss`)).toMatch(new RegExp(`src/${name}\\.scss$`))
-    }
-  )
+  it.each([
+    'functions',
+    'mixins',
+    'variables',
+    'placeholders',
+    'grid',
+    'spacing',
+  ])('exposes src/%s, with and without the extension', (name) => {
+    expect(resolve(`@zairakai/mithril-scss/src/${name}`)).toMatch(
+      new RegExp(`src/${name}\\.scss$`),
+    )
+    expect(resolve(`@zairakai/mithril-scss/src/${name}.scss`)).toMatch(
+      new RegExp(`src/${name}\\.scss$`),
+    )
+  })
 
   it('still exposes the entry, the bases and the component styles', () => {
     expect(resolve('@zairakai/mithril-scss')).toMatch(/src\/index\.scss$/)
-    expect(resolve('@zairakai/mithril-scss/bases/reset.scss')).toMatch(/src\/bases\/reset\.scss$/)
-    expect(resolve('@zairakai/mithril-scss/components')).toMatch(/src\/components\/index\.scss$/)
+    expect(resolve('@zairakai/mithril-scss/bases/reset.scss')).toMatch(
+      /src\/bases\/reset\.scss$/,
+    )
+    expect(resolve('@zairakai/mithril-scss/components')).toMatch(
+      /src\/components\/index\.scss$/,
+    )
+  })
+  describe('tokens', () => {
+    it('writes the sizes in rem, from the base font size', () => {
+      const css = sass.compile(entry, { style: 'expanded' }).css
+
+      expect(css).toContain('--zk-space-2: 0.5rem')
+      expect(css).toContain('--zk-radius: 0.5rem')
+      expect(css).not.toMatch(/--zk-(space|radius)[a-z0-9-]*: [0-9.]+px/)
+    })
+
+    it('writes the durations', () => {
+      const css = sass.compile(entry, { style: 'expanded' }).css
+
+      expect(css).toContain('--zk-duration: 150ms')
+      expect(css).toContain('animation: zk-skeleton var(--zk-duration-loop)')
+    })
+  })
+
+  describe('motion', () => {
+    const css = sass.compile(entry, { style: 'expanded' }).css
+
+    it('writes the enter and exit tokens of Material 3', () => {
+      expect(css).toContain('--zk-duration-enter: 400ms')
+      expect(css).toContain('--zk-duration-exit: 200ms')
+      expect(css).toContain(
+        '--zk-easing-enter: cubic-bezier(0.05, 0.7, 0.1, 1)',
+      )
+      expect(css).toContain('--zk-easing-exit: cubic-bezier(0.3, 0, 0.8, 0.15)')
+    })
+
+    it('animates a dialog in and out with CSS only', () => {
+      expect(css).toMatch(/\.modal:is\(dialog\)\[open]\s*{[^}]*opacity: 1/)
+      expect(css).toContain('allow-discrete')
+      expect(css).toContain('@starting-style')
+    })
+
+    it('stops the transitions for the readers who want less motion', () => {
+      expect(css).toMatch(
+        /prefers-reduced-motion: reduce\)\s*{\s*\.modal:is\(dialog\)[^}]*transition: none/,
+      )
+    })
+  })
+
+  describe('focus ring', () => {
+    it('is the one of $focus-ring, in rem, and can be changed with $overrides', () => {
+      const css = sass.compile(entry, { style: 'expanded' }).css
+
+      expect(css).toContain('outline: 0.125rem solid var(--zk-focus)')
+
+      const wide = compile(
+        '@use "src/components" with ($overrides: (focus-ring: (width: 4px)));',
+      )
+
+      expect(wide).toContain('outline: 0.25rem solid var(--zk-focus)')
+    })
+  })
+
+  describe('reset', () => {
+    const withSettings = (settings) =>
+      compile(`@use "src/components"${settings};`)
+
+    it('is written by default, before the components', () => {
+      const css = withSettings('')
+
+      expect(css).toContain('box-sizing: border-box')
+      expect(css.indexOf('box-sizing: border-box')).toBeLessThan(
+        css.indexOf('.accordion'),
+      )
+    })
+
+    it('is left out with $reset: false', () => {
+      expect(withSettings(' with ($reset: false)')).not.toContain(
+        'box-sizing: border-box',
+      )
+    })
+
+    it('is left out when the styles are limited to an element', () => {
+      expect(withSettings(' with ($scope: ".demo")')).not.toContain(
+        'box-sizing: border-box',
+      )
+    })
+  })
+
+  describe('element separator', () => {
+    const css = sass.compile(entry, { style: 'expanded' }).css
+
+    const withSeparator = (separator) =>
+      compile(
+        `@use "src/components" with ($element-separator: "${separator}");`,
+      )
+
+    it('joins the elements with a dash by default', () => {
+      expect(css).toContain('.alert-title')
+      expect(css).not.toContain('.alert__title')
+    })
+
+    it('joins them with the configured separator', () => {
+      const bem = withSeparator('__')
+
+      expect(bem).toContain('.alert__title')
+      expect(bem).toContain('.alert__close')
+      expect(bem).not.toContain('.alert-title')
+    })
+
+    it('applies it to the compound selectors too', () => {
+      const bem = withSeparator('__')
+
+      expect(bem).toMatch(
+        /\.splitter\[data-direction=horizontal] > \.splitter__handle/,
+      )
+    })
+
+    it('keeps the same number of rules whatever the separator', () => {
+      const count = (text) => (text.match(/{/g) ?? []).length
+
+      expect(count(withSeparator('__'))).toBe(count(css))
+    })
   })
 })

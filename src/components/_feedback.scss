@@ -1,37 +1,45 @@
-@use "shared";
+@use 'shared';
 
 .alert,
 .banner {
   display: flex;
-  gap: var(--zk-space-2);
   align-items: flex-start;
+  gap: var(--zk-space-2);
   padding: var(--zk-space-2) var(--zk-space-3);
-  color: var(--on-surface);
-  background: var(--surface);
   border: 1px solid var(--zk-border);
   border-inline-start: 4px solid var(--zk-info);
   border-radius: var(--zk-radius);
+  color: var(--on-surface);
+  background: var(--surface);
 
   @include shared.variants;
 
-  &-content,
-  &-body {
+  @include shared.element(content) {
     flex: 1;
   }
 
-  &-title {
+  @include shared.element(title) {
     margin: 0;
     font-weight: 600;
   }
+}
 
-  &-close,
-  &-dismiss {
+.alert {
+  @include shared.element(body) {
+    flex: 1;
+  }
+
+  @include shared.element(close) {
     @include shared.ghost-button;
   }
 }
 
 .banner {
   border-radius: 0;
+
+  @include shared.element(dismiss) {
+    @include shared.ghost-button;
+  }
 }
 
 .cookie-banner {
@@ -40,27 +48,26 @@
   position: fixed;
   inset-block-end: var(--zk-space-3);
   inset-inline: var(--zk-space-3);
-  z-index: 900;
+  z-index: shared.layer(banner);
   display: flex;
   flex-direction: column;
   gap: var(--zk-space-2);
   max-inline-size: 40rem;
-  padding: var(--zk-space-3);
   margin-inline: auto;
+  padding: var(--zk-space-3);
 
-  &-title {
+  @include shared.element(title) {
     margin: 0;
     font-weight: 600;
   }
 
-  &-actions {
+  @include shared.element(actions) {
     display: flex;
     flex-wrap: wrap;
     gap: var(--zk-space-2);
   }
 
-  &-accept,
-  &-save {
+  @include shared.element(accept, save) {
     @include shared.ghost-button;
 
     color: var(--on-primary);
@@ -71,19 +78,18 @@
     }
   }
 
-  &-reject,
-  &-customize {
+  @include shared.element(reject, customize) {
     @include shared.ghost-button;
 
     border: 1px solid var(--zk-border-strong);
   }
 
-  &-categories {
+  @include shared.element(categories) {
     border: 1px solid var(--zk-border);
     border-radius: var(--zk-radius);
   }
 
-  &-description {
+  @include shared.element(description) {
     margin: 0;
     font-size: 0.875em;
     color: var(--zk-muted);
@@ -94,11 +100,11 @@
   display: block;
   inline-size: 100%;
   block-size: 0.5rem;
-  overflow: hidden;
-  appearance: none;
-  background: var(--zk-pressed);
   border: 0;
   border-radius: 999px;
+  background: var(--zk-pressed);
+  overflow: hidden;
+  appearance: none;
 
   &::-webkit-progress-bar {
     background: var(--zk-pressed);
@@ -106,35 +112,40 @@
 
   &::-webkit-progress-value {
     background: var(--primary);
-    transition: inline-size var(--zk-duration);
+    transition: inline-size var(--zk-duration) var(--zk-easing);
   }
 
   &::-moz-progress-bar {
     background: var(--primary);
   }
 
-  &-track {
-    overflow: hidden;
-    background: var(--zk-pressed);
+  @include shared.element(track) {
     border-radius: 999px;
+    background: var(--zk-pressed);
+    overflow: hidden;
   }
 
-  &-bar {
+  @include shared.element(bar) {
     block-size: 100%;
     background: var(--primary);
-    transition: inline-size var(--zk-duration);
+    transition: inline-size var(--zk-duration) var(--zk-easing);
   }
 }
 
 .skeleton {
   display: block;
   min-block-size: 1em;
-  background: linear-gradient(90deg, var(--zk-hover) 25%, var(--zk-pressed) 37%, var(--zk-hover) 63%);
-  background-size: 400% 100%;
   border-radius: var(--zk-radius);
-  animation: zk-skeleton 1.4s ease infinite;
+  background: linear-gradient(
+    90deg,
+    var(--zk-hover) 25%,
+    var(--zk-pressed) 37%,
+    var(--zk-hover) 63%
+  );
+  background-size: 400% 100%;
+  animation: zk-skeleton var(--zk-duration-loop) ease infinite;
 
-  &-group {
+  @include shared.element(group) {
     display: flex;
     flex-direction: column;
     gap: var(--zk-space-2);
@@ -156,35 +167,44 @@
   display: flex;
   flex-direction: column;
   gap: var(--zk-space-2);
-  padding: 0;
   margin: 0;
-  overflow: visible;
-  background: transparent;
+  padding: 0;
   border: 0;
+  background: transparent;
+  overflow: visible;
 }
 
 .toast {
   @include shared.surface(2);
 
   display: flex;
-  gap: var(--zk-space-2);
   align-items: flex-start;
+  gap: var(--zk-space-2);
   min-inline-size: 16rem;
   padding: var(--zk-space-2) var(--zk-space-3);
   border-inline-start: 4px solid var(--zk-info);
+  transition:
+    opacity var(--zk-duration-enter-small) var(--zk-easing-enter-small),
+    transform var(--zk-duration-enter-small) var(--zk-easing-enter-small);
+
+  // A toast that is added to the page slides up and fades in.
+  @starting-style {
+    opacity: 0;
+    transform: translateY(var(--zk-space-3));
+  }
 
   @include shared.variants;
 
-  &-title {
+  @include shared.element(title) {
     margin: 0;
     font-weight: 600;
   }
 
-  &-message {
+  @include shared.element(message) {
     flex: 1;
   }
 
-  &-close {
+  @include shared.element(close) {
     @include shared.ghost-button;
   }
 }
@@ -195,7 +215,8 @@
   }
 
   .progress-bar,
-  .progress::-webkit-progress-value {
+  .progress::-webkit-progress-value,
+  .toast {
     transition: none;
   }
 }

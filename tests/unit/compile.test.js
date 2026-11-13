@@ -13,7 +13,7 @@ describe('mithril scss', () => {
   it('compiles the main entry without errors', () => {
     const entry = srcPath('../../src/index.scss')
 
-    // The index only uses @forward (no direct CSS output) — compile must succeed
+    // The index only uses @forward (no direct CSS output) - compile must succeed
     let result
     expect(() => {
       result = sass.compile(entry, { style: 'expanded' })
@@ -44,147 +44,180 @@ describe('mithril scss', () => {
     expect(typeof result.css).toBe('string')
   })
 
-  it('shape mixin — symmetry: diagonal mirrors top-left to bottom-right', () => {
+  it('shape mixin - symmetry: diagonal mirrors top-left to bottom-right', () => {
     // medium = 12px → 0.75rem
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.shape("medium", "top-left", "diagonal"); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.shape("medium", "top-left", "diagonal"); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     expect(result.css).toContain('border-radius:0.75rem 0 0.75rem 0')
   })
 
-  it('shape mixin — symmetry: horizontal mirrors top-left to bottom-left', () => {
+  it('shape mixin - symmetry: horizontal mirrors top-left to bottom-left', () => {
     // large = 16px → 1rem
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.shape("large", "top-left", "horizontal"); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.shape("large", "top-left", "horizontal"); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     expect(result.css).toContain('border-radius:1rem 0 0 1rem')
   })
 
-  it('shape mixin — symmetry: vertical mirrors top-left to top-right', () => {
+  it('shape mixin - symmetry: vertical mirrors top-left to top-right', () => {
     // medium = 12px → 0.75rem
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.shape("medium", "top-left", "vertical"); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.shape("medium", "top-left", "vertical"); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     expect(result.css).toContain('border-radius:0.75rem 0.75rem 0 0')
   })
 
-  it('shape mixin — symmetry: diagonal on bottom-right mirrors to top-left', () => {
+  it('shape mixin - symmetry: diagonal on bottom-right mirrors to top-left', () => {
     // extra-small = 4px → 0.25rem
     let result
     expect(() => {
       result = sass.compileString(
         `@use "mixins" as mx; .x { @include mx.shape("extra-small", "bottom-right", "diagonal"); }`,
-        { style: 'compressed', loadPaths: [srcPath('../../src')] }
+        { style: 'compressed', loadPaths: [srcPath('../../src')] },
       )
     }).not.toThrow()
     expect(result.css).toContain('border-radius:0.25rem 0 0.25rem 0')
   })
 
-  it('heading mixin — applies margin, padding, line-height, font-weight, letter-spacing', () => {
+  it('heading mixin - applies margin, padding, line-height, font-weight, letter-spacing', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; h1 { @include mx.heading(1); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; h1 { @include mx.heading(1); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
-    expect(result.css).toContain('font-weight:300')
-    expect(result.css).toContain('letter-spacing:-1.5px')
+    expect(result.css).toContain('font-weight:400')
+    expect(result.css).toContain('letter-spacing:0')
   })
 
-  it('font-size mixin — applies rem-converted font-size', () => {
+  it('font-size mixin - applies rem-converted font-size', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.font-size(24); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.font-size(24); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     // 24px / 16px = 1.5rem
     expect(result.css).toContain('font-size:1.5rem')
   })
 
-  it('text-fluid mixin — outputs clamp()', () => {
+  it('text-fluid mixin - outputs clamp()', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.text-fluid("base"); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.text-fluid("base"); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     expect(result.css).toContain('font-size:clamp(')
     expect(result.css).toContain('vw')
   })
 
-  it('line-height mixin — applies unitless ratio as-is', () => {
+  it('line-height mixin - applies unitless ratio as-is', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.line-height("base"); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.line-height("base"); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     // base = 1.2 (unitless)
     expect(result.css).toContain('line-height:1.2')
   })
 
-  it('line-height mixin — converts px value to rem', () => {
+  it('line-height mixin - converts px value to rem', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.line-height("large"); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.line-height("large"); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     // large = 20px → 1.25rem
     expect(result.css).toContain('line-height:1.25rem')
   })
 
-  it('state-layer mixin — outputs pseudo-element with opacity', () => {
+  it('state-layer mixin - outputs pseudo-element with opacity', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.state-layer("hover"); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.state-layer("hover"); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     expect(result.css).toContain('position:relative')
     expect(result.css).toContain('opacity:.08')
     expect(result.css).toContain('pointer-events:none')
   })
 
-  it('state-disabled mixin — outputs disabled opacity and pointer-events', () => {
+  it('state-disabled mixin - outputs disabled opacity and pointer-events', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; .x { @include mx.state-disabled(); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; .x { @include mx.state-disabled(); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     expect(result.css).toContain('opacity:.38')
     expect(result.css).toContain('pointer-events:none')
     expect(result.css).toContain('cursor:not-allowed')
   })
 
-  it('generate-theme mixin — outputs primary and primary-rgb CSS vars', () => {
+  it('generate-theme mixin - outputs primary and primary-rgb CSS vars', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "mixins" as mx; :root { @include mx.generate-theme(); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "mixins" as mx; :root { @include mx.generate-theme(); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     // blue-grey / darken-2 = #455a64 (sober neutral default)
     expect(result.css).toContain('--primary: #455a64')
@@ -193,12 +226,12 @@ describe('mithril scss', () => {
     expect(result.css).toContain('--error: #f44336')
   })
 
-  it('generate-theme mixin — accepts partial overrides', () => {
+  it('generate-theme mixin - accepts partial overrides', () => {
     let result
     expect(() => {
       result = sass.compileString(
         `@use "mixins" as mx; :root { @include mx.generate-theme((primary: #ff5722, on-primary: #fff)); }`,
-        { style: 'compressed', loadPaths: [srcPath('../../src')] }
+        { style: 'compressed', loadPaths: [srcPath('../../src')] },
       )
     }).not.toThrow()
     expect(result.css).toContain('--primary: #ff5722')
@@ -207,26 +240,135 @@ describe('mithril scss', () => {
     expect(result.css).toContain('--secondary:')
   })
 
-  it('theme function — returns var() reference', () => {
+  it('theme function - returns var() reference', () => {
     let result
     expect(() => {
-      result = sass.compileString(`@use "functions" as fn; .x { background: fn.theme("primary"); }`, {
-        style: 'compressed',
-        loadPaths: [srcPath('../../src')],
-      })
+      result = sass.compileString(
+        `@use "functions" as fn; .x { background: fn.theme("primary"); }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+        },
+      )
     }).not.toThrow()
     expect(result.css).toContain('background:var(--primary)')
   })
 
-  it('get-color function — retrieves color from $colors by name and variant', () => {
+  it('get-color function - retrieves color from $colors by name and variant', () => {
     let result
     expect(() => {
       result = sass.compileString(
         `@use "functions" as fn; .x { color: fn.get-color("red"); background: fn.get-color("blue", "darken-2"); }`,
-        { style: 'compressed', loadPaths: [srcPath('../../src')] }
+        { style: 'compressed', loadPaths: [srcPath('../../src')] },
       )
     }).not.toThrow()
     expect(result.css).toContain('color:#f44336')
     expect(result.css).toContain('background:#1976d2')
+  })
+
+  it('is configured through the main entry', () => {
+    const css = sass.compileString(
+      '@use "index" as m with ($default-font-size: 20px); .a { width: m.px-to-rem(40px); }',
+      {
+        style: 'compressed',
+        loadPaths: [srcPath('../../src')],
+      },
+    ).css
+
+    expect(css).toBe('.a{width:2rem}')
+  })
+
+  it('makes the fluid sizes follow the default font size', () => {
+    const css = sass.compileString(
+      '@use "index" as m with ($default-font-size: 20px); @use "sass:map"; .a { min: map.get(map.get(m.$font-size-fluid, base), min); base: map.get(m.$font-size, base); }',
+      {
+        style: 'compressed',
+        loadPaths: [srcPath('../../src')],
+      },
+    ).css
+
+    expect(css).toBe('.a{min:20px;base:20px}')
+  })
+
+  describe('partial overrides', () => {
+    const value = (overrides, expression, warnings = []) =>
+      sass.compileString(
+        `@use "sass:map"; @use "index" as m with ($overrides: ${overrides}); .a { v: ${expression}; }`,
+        {
+          style: 'compressed',
+          loadPaths: [srcPath('../../src')],
+          logger: { warn: (message) => warnings.push(message) },
+        },
+      ).css
+
+    it('changes one key and keeps the others', () => {
+      const css = value(
+        '(spacings: (4: 99px))',
+        'map.get(m.$spacings, 4) map.get(m.$spacings, 1)',
+      )
+
+      expect(css).toBe('.a{v:99px 1px}')
+    })
+
+    it('merges the nested maps deeply', () => {
+      const css = value(
+        '(colors: (red: (base: #c00)))',
+        'map.get(map.get(m.$colors, red), base) map.get(map.get(m.$colors, red), lighten-1)',
+      )
+
+      expect(css).toBe('.a{v:#c00 #ef5350}')
+    })
+
+    it('feeds what is computed from the map', () => {
+      const css = value(
+        '(font-size: (base: 20px))',
+        'map.get(map.get(m.$font-size-fluid, base), min)',
+      )
+
+      expect(css).toBe('.a{v:20px}')
+    })
+
+    it('warns about a name that is not a map', () => {
+      const warnings = []
+
+      value('(spacingz: (a: 1px))', '1px', warnings)
+
+      expect(warnings.join('')).toContain("'spacingz' is not a map")
+    })
+
+    it('does nothing without overrides', () => {
+      expect(value('()', 'map.get(m.$spacings, 4)')).toBe('.a{v:4px}')
+    })
+  })
+
+  describe('values in rem', () => {
+    const css = (source) =>
+      sass.compileString(`@use "index" as m; ${source}`, {
+        style: 'compressed',
+        loadPaths: [srcPath('../../src')],
+      }).css
+
+    it('keeps a keyword as a letter spacing', () => {
+      expect(css('.a { v: m.length-to-rem(normal) }')).toBe('.a{v:normal}')
+    })
+
+    it('converts a letter spacing to rem', () => {
+      expect(css('.a { v: m.length-to-rem(-1.5px) }')).toBe('.a{v:-0.09375rem}')
+    })
+
+    it('has the easing curves of Material 3', () => {
+      expect(css('.a { v: map-get(m.$easings, standard-decelerate) }')).toBe(
+        '.a{v:cubic-bezier(0, 0, 0, 1)}',
+      )
+    })
+
+    it('has the 30px font size', () => {
+      expect(css('.a { v: map-get(m.$font-size, 30) }')).toContain('30px')
+    })
+
+    it('has the layers and the durations', () => {
+      expect(css('.a { v: map-get(m.$z-index, overlay) }')).toBe('.a{v:1000}')
+      expect(css('.a { v: map-get(m.$durations, short3) }')).toBe('.a{v:150ms}')
+    })
   })
 })

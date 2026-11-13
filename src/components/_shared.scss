@@ -1,34 +1,88 @@
+@use 'sass:map';
+@use 'sass:list';
+@use 'sass:selector';
+@use '../config';
+@use '../variables';
+@use '../functions' as fn;
+
 /// Shared pieces of the component styles.
 
-@mixin focus-ring {
-  outline: 2px solid var(--zk-focus);
-  outline-offset: 2px;
+/// The end of the class of an element, for the places where `element()` does
+/// not fit (a sibling, a state of the parent): `&[data-open] &#{part(body)} {}`.
+@function part($name) {
+  @return '#{config.$element-separator}#{$name}';
+}
+
+/// The elements of the block it is written in, joined by `$element-separator`.
+/// Several names share the same rules.
+///
+///   .card { @include element(header, footer) { margin: 0; } }
+///   // .card-header, .card-footer { margin: 0; }
+@mixin element($names...) {
+  $selectors: ();
+
+  @each $name in $names {
+    $selectors: list.join(
+      $selectors,
+      selector.append(&, '#{config.$element-separator}#{$name}'),
+      comma
+    );
+  }
+
+  @at-root #{$selectors} {
+    @content;
+  }
+}
+
+/// The `z-index` of a layer, from `$z-index`.
+@function layer($name) {
+  @return map.get(variables.$z-index, $name);
+}
+
+/// The focus ring: the width and offset of `$focus-ring`, or the ones given.
+///
+/// @param {number|null} $width - The width of the ring. Default: from `$focus-ring`.
+/// @param {number|null} $offset - The space between the ring and the element. Default: from `$focus-ring`.
+@mixin focus-ring($width: null, $offset: null) {
+  $ring-width: map.get(variables.$focus-ring, width);
+  $ring-offset: map.get(variables.$focus-ring, offset);
+
+  @if null != $width {
+    $ring-width: $width;
+  }
+
+  @if null != $offset {
+    $ring-offset: $offset;
+  }
+
+  outline: fn.px-to-rem($ring-width) solid var(--zk-focus);
+  outline-offset: fn.px-to-rem($ring-offset);
 }
 
 /// A surface: the base of cards, panels, menus and dialogs.
 @mixin surface($shadow: 1) {
-  color: var(--on-surface);
-  background: var(--surface);
   border: 1px solid var(--zk-border);
   border-radius: var(--zk-radius-lg);
+  color: var(--on-surface);
+  background: var(--surface);
   box-shadow: var(--zk-shadow-#{$shadow});
 }
 
 /// A plain button that only has a hover and a pressed state.
 @mixin ghost-button {
   padding: var(--zk-space-1) var(--zk-space-2);
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  background: transparent;
   border: 0;
   border-radius: var(--zk-radius);
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
 
-  &:hover:not(:disabled, [aria-disabled="true"]) {
+  &:hover:not(:disabled, [aria-disabled='true']) {
     background: var(--zk-hover);
   }
 
-  &:active:not(:disabled, [aria-disabled="true"]) {
+  &:active:not(:disabled, [aria-disabled='true']) {
     background: var(--zk-pressed);
   }
 
@@ -37,50 +91,133 @@
   }
 
   &:disabled,
-  &[aria-disabled="true"] {
-    cursor: not-allowed;
+  &[aria-disabled='true'] {
     opacity: 0.38;
+    cursor: not-allowed;
   }
 }
 
 /// The color of a status, from `data-variant`.
 @mixin variants($property: border-color) {
-  &[data-variant="info"] {
+  &[data-variant='info'] {
     #{$property}: var(--zk-info);
   }
 
-  &[data-variant="success"] {
+  &[data-variant='success'] {
     #{$property}: var(--zk-success);
   }
 
-  &[data-variant="warning"] {
+  &[data-variant='warning'] {
     #{$property}: var(--zk-warning);
   }
 
-  &[data-variant="error"] {
+  &[data-variant='error'] {
     #{$property}: var(--error);
   }
 }
 
 @mixin field {
   padding: var(--zk-space-1) var(--zk-space-2);
+  border: 1px solid var(--zk-border-strong);
+  border-radius: var(--zk-radius);
   font: inherit;
   color: var(--on-surface);
   background: var(--surface);
-  border: 1px solid var(--zk-border-strong);
-  border-radius: var(--zk-radius);
 
   &:focus-visible {
     border-color: var(--zk-focus);
-    outline: 2px solid var(--zk-focus);
-    outline-offset: 0;
+
+    @include focus-ring($offset: 0);
   }
 
   &:disabled {
     opacity: 0.38;
   }
 
-  &[aria-invalid="true"] {
+  &[aria-invalid='true'] {
     border-color: var(--error);
+  }
+}
+
+/// The enter and exit of a layer that is shown by the browser (`<dialog>`, `popover`), in CSS only.
+/// It enters decelerating and exits accelerating, with the durations of Material 3, and does
+/// nothing for the readers who asked for less motion.
+///
+/// @param {string|null} $from - Where it comes from: `null` (it grows from 90%) or `inline-end`
+///   (it slides in from the end side, for a drawer).
+/// @param {boolean} $small - A small element (menu, popover, tooltip): standard easing, shorter.
+/// @param {string} $open - The selector of the open state.
+@mixin overlay-motion($from: null, $small: false, $open: '[open]') {
+  $enter-duration: var(--zk-duration-enter);
+  $enter-easing: var(--zk-easing-enter);
+  $exit-duration: var(--zk-duration-exit);
+  $exit-easing: var(--zk-easing-exit);
+
+  @if $small {
+    $exit-duration: var(--zk-duration-exit-small);
+    $enter-duration: var(--zk-duration-enter-small);
+    $enter-easing: var(--zk-easing-enter-small);
+    $exit-easing: var(--zk-easing-exit-small);
+  }
+
+  $hidden: scale(0.9);
+
+  @if 'inline-end' == $from {
+    $hidden: translateX(100%);
+  }
+
+  opacity: 0;
+  transform: $hidden;
+  transition:
+    opacity $exit-duration $exit-easing,
+    transform $exit-duration $exit-easing,
+    overlay $exit-duration allow-discrete,
+    display $exit-duration allow-discrete;
+
+  &#{$open} {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity $enter-duration $enter-easing,
+      transform $enter-duration $enter-easing,
+      overlay $enter-duration allow-discrete,
+      display $enter-duration allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: $hidden;
+    }
+  }
+
+  // The scrim behind a dialog fades with it.
+  @if not $small {
+    &::backdrop {
+      opacity: 0;
+      transition:
+        opacity $exit-duration $exit-easing,
+        overlay $exit-duration allow-discrete,
+        display $exit-duration allow-discrete;
+    }
+
+    &#{$open}::backdrop {
+      opacity: 1;
+      transition:
+        opacity $enter-duration $enter-easing,
+        overlay $enter-duration allow-discrete,
+        display $enter-duration allow-discrete;
+
+      @starting-style {
+        opacity: 0;
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &,
+    &#{$open},
+    &::backdrop,
+    &#{$open}::backdrop {
+      transition: none;
+    }
   }
 }

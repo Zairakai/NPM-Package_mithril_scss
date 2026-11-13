@@ -1,7 +1,6 @@
-@use "sass:map";
-@use "variables" as MithrilVariables;
-@use "functions" as MithrilFunctions;
-@use "mixins" as MithrilMixins;
+@use 'sass:map';
+@use 'variables' as MithrilVariables;
+@use 'mixins' as MithrilMixins;
 
 /// Documentation for grid.scss
 /// This file defines grid utility classes for layout systems based on a configurable grid system.
@@ -21,13 +20,13 @@
     }
   }
 
-  /// Loop through the grid configurations for different screen sizes and directions
-  @each $direction, $sizes in MithrilVariables.$grids {
-    @each $size, $config in $sizes {
-      /// Generate media queries for each grid size configuration (columns and gutter)
-      @include MithrilMixins.media-queries($size, $direction) {
-        @include MithrilMixins.grid(map.get($config, "cols"), map.get($config, "gap"));
-      }
+  /// The grid of each width class, mobile first: a class only writes it from its width up.
+  @each $key, $config in MithrilVariables.$grids {
+    @include MithrilMixins.media-queries($key) {
+      @include MithrilMixins.grid(
+        map.get($config, 'cols'),
+        map.get($config, 'gap')
+      );
     }
   }
 }

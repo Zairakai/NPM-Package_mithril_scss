@@ -10,12 +10,12 @@
 | Step | Command / Action | Description |
 | :--- | :--- | :--- |
 | **1. Install** | `npm install` | Install dependencies and set up git hooks. |
-| **2. Branch** | `git checkout -b feature/#TICKET-name` | Create a feature branch from `main`. |
+| **2. Branch** | `git checkout -b feature/#TICKET-name` | Create a feature branch from `develop`. |
 | **3. Code** | *(your IDE)* | Implement your changes following quality standards. |
 | **4. Quality** | `make quality` | Run the full quality gate. |
 | **5. Test** | `make test` | Ensure all tests are passing. |
 | **6. Commit** | `git commit -m "type(scope): #TICKET subject"` | Use [Conventional Commits][git-rules] format. |
-| **7. Push** | `git push origin feature/#TICKET-name` | Push and open a Merge Request to `main`. |
+| **7. Push** | `git push origin feature/#TICKET-name` | Push and open a Merge Request to `develop`. |
 
 ---
 
@@ -26,7 +26,7 @@
 | **🐛 Bug Reports** | Use the issue template. Include minimal reproduction steps, browser/Node.js version, and SCSS compiler version. |
 | **✨ Feature Requests** | Describe the use case. Must fit the scope (grid, spacing, typography, responsive utilities). |
 | **📐 Grid System** | In `src/grid.scss`. Follow mobile-first BEM approach. Keep breakpoints consistent with `src/variables.scss`. |
-| **📏 Spacing / Variables** | In `src/spacing.scss` and `src/variables.scss`. Keep naming stable — breaking changes require major bump. |
+| **📏 Spacing / Variables** | In `src/spacing.scss` and `src/variables.scss`. Keep naming stable - breaking changes require major bump. |
 | **🎨 Mixins / Functions** | In `src/mixins.scss` and `src/functions.scss`. Document input/output. Export from `src/index.scss`. |
 | **🧩 New Modules** | Follow BEM naming convention. Add to `src/index.scss`. Include compile test in `tests/unit/`. |
 
@@ -36,6 +36,16 @@
 
 | Command | Tool | Description |
 | :--- | :--- | :--- |
+| `make quality` | All | Full static analysis and formatting gate. |
+| `make quality-fix` | All | Apply the fixes that the tools can make. |
+| `make stylelint` | Stylelint | Run SCSS static analysis. |
+| `make prettier` | Prettier | Check code formatting. |
+| `make knip` | Knip | Detect dead code and unused dependencies. |
+| `make markdownlint` | Markdownlint | Validate Markdown documentation. |
+| `make test` | Vitest | Run the compile and unit tests. |
+| `make bats` | BATS | Run shell script integration tests. |
+
+--- | :--- | :--- |
 | `make quality` | All | Full quality gate (stylelint, prettier, tests). |
 | `make stylelint` | Stylelint | SCSS linting. |
 | `make prettier` | Prettier | Code formatting check. |

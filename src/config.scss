@@ -1,0 +1,58 @@
+/// Settings of the framework: what a consumer sets with `@use ... with (...)`.
+/// Everything else (the tokens) is in `variables.scss`, `!default` too.
+///
+/// @example scss
+///   @use "@zairakai/mithril-scss" with ($default-font-size: 18px);
+
+/// Default font size
+///
+/// The base of `px-to-rem()` and of the `base` font size, so of the fluid sizes.
+$default-font-size: 16px !default;
+
+/// Default line height
+///
+/// The line height of the text, a ratio without unit so that it follows the font size of
+/// every element: `22px` on `16px` is `1.375`. The line heights of the headings are in
+/// `$line-height`, for the designer to set.
+$default-line-height: 1.375 !default;
+
+/// Reset
+///
+/// The component styles start with the base reset (`bases/reset`), as they need it. Set
+/// `false` to load your own, or none. It is also left out when the styles are limited
+/// to an element with `$scope`: a reset of the page does not belong inside an element.
+///
+/// @example scss
+///   @use "@zairakai/mithril-scss/components" with ($reset: false);
+$reset: true !default;
+
+/// Default grid
+///
+/// The number of columns when `grid-columns()` is not given one. A 12-column grid is common.
+$default-grid-columns: 1 !default;
+
+/// Element separator
+///
+/// What joins a block to its element in the component styles: `.card` + `-header`
+/// gives `.card-header`. Set `'__'` to get `.card__header`; the markup is then
+/// yours to name the same way.
+///
+/// @example scss
+///   @use "@zairakai/mithril-scss/components" with ($element-separator: "__");
+$element-separator: '-' !default;
+
+/// Overrides
+///
+/// The keys to change in the token maps, without restating the others. One entry per map,
+/// named like the variable: `spacings`, `colors`, `theme`, `shape-radius`, `breakpoints`...
+/// The maps are merged deeply, so `colors: (red: (base: #c00))` changes one shade only.
+/// To replace a whole map, set the variable itself instead (`$spacings: (...)`).
+///
+/// @example scss
+///   @use "@zairakai/mithril-scss" with (
+///     $overrides: (
+///       spacings: (sm: 12px, md: 20px),
+///       shape-radius: (lg: 12px)
+///     )
+///   );
+$overrides: () !default;
