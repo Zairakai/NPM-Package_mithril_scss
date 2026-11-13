@@ -1,30 +1,31 @@
-@use "shared";
+@use 'shared';
 
 :where(.code, .kbd, .code-block, .terminal, .diff, .json-viewer) {
-  font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, 'Cascadia Code', Menlo, Consolas, monospace;
 }
 
 .code {
   padding: 0.1em 0.4em;
+  border-radius: var(--zk-radius);
   font-size: 0.9em;
   background: var(--zk-hover);
-  border-radius: var(--zk-radius);
 }
 
 .kbd,
 .kbd-key {
   padding: 0.1em 0.45em;
-  font-size: 0.85em;
-  background: var(--surface);
   border: 1px solid var(--zk-border-strong);
   border-radius: var(--zk-radius);
+  font-size: 0.85em;
+  background: var(--surface);
   box-shadow: 0 1px 0 var(--zk-border-strong);
 }
 
 .kbd-combo {
   display: inline-flex;
-  gap: var(--zk-space-1);
   align-items: center;
+  gap: var(--zk-space-1);
 }
 
 .kbd-separator {
@@ -35,13 +36,13 @@
   display: flex;
   gap: var(--zk-space-2);
   padding: var(--zk-space-3);
-  background: var(--zk-hover);
   border-inline-start: 4px solid var(--zk-info);
   border-radius: var(--zk-radius);
+  background: var(--zk-hover);
 
   @include shared.variants;
 
-  &-title {
+  @include shared.element(title) {
     margin: 0;
     font-weight: 600;
   }
@@ -53,39 +54,38 @@
 .json-viewer {
   @include shared.surface(0);
 
-  overflow: hidden;
   font-size: 0.875em;
+  overflow: hidden;
 }
 
 .code-block {
-  &-header,
-  &-title {
+  @include shared.element(header, title) {
     display: flex;
-    gap: var(--zk-space-2);
     align-items: center;
+    gap: var(--zk-space-2);
     padding: var(--zk-space-1) var(--zk-space-3);
-    color: var(--zk-muted);
     border-bottom: 1px solid var(--zk-border);
+    color: var(--zk-muted);
   }
 
-  &-pre {
+  @include shared.element(pre) {
     margin: 0;
     padding: var(--zk-space-3);
     overflow-x: auto;
   }
 
-  &-copy {
+  @include shared.element(copy) {
     @include shared.ghost-button;
 
     margin-inline-start: auto;
   }
 
-  &-status {
+  @include shared.element(status) {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
-    overflow: hidden;
     clip-path: inset(50%);
+    overflow: hidden;
   }
 
   .code-line[data-highlighted] {
@@ -93,12 +93,12 @@
   }
 
   &[data-line-numbers] .code-line::before {
+    content: attr(data-line);
     display: inline-block;
     inline-size: 2.5em;
     padding-inline-end: var(--zk-space-2);
-    color: var(--zk-muted);
     text-align: end;
-    content: attr(data-line);
+    color: var(--zk-muted);
   }
 }
 
@@ -110,69 +110,69 @@
   color: var(--surface);
   background: var(--on-surface);
 
-  &-header {
+  @include shared.element(header) {
     display: flex;
     justify-content: space-between;
     padding: var(--zk-space-1) var(--zk-space-3);
     border-bottom: 1px solid rgb(var(--surface-rgb) / 20%);
   }
 
-  &-body {
-    padding: var(--zk-space-3);
+  @include shared.element(body) {
     margin: 0;
+    padding: var(--zk-space-3);
     overflow-x: auto;
   }
 
-  &-prompt {
+  @include shared.element(prompt) {
     margin-inline-end: var(--zk-space-2);
     color: var(--zk-success);
     user-select: none;
   }
 
-  &-comment {
+  @include shared.element(comment) {
     opacity: 0.6;
   }
 
-  &-copy {
+  @include shared.element(copy) {
     @include shared.ghost-button;
   }
 }
 
 .diff {
-  &-line {
+  @include shared.element(line) {
     display: block;
     padding-inline: var(--zk-space-2);
     text-decoration: none;
     white-space: pre;
 
-    &[data-type="add"] {
+    &[data-type='add'] {
       background: rgb(46 160 67 / 20%);
     }
 
-    &[data-type="del"] {
+    &[data-type='del'] {
       background: rgb(248 81 73 / 20%);
     }
 
-    &[data-type="hunk"] {
+    &[data-type='hunk'] {
       color: var(--zk-info);
       background: var(--zk-hover);
     }
   }
 
-  &-number {
+  @include shared.element(number) {
     display: inline-block;
     inline-size: 3em;
     color: var(--zk-muted);
     user-select: none;
   }
 
-  &-mark {
+  @include shared.element(mark) {
     display: inline-block;
     inline-size: 1.5ch;
     user-select: none;
   }
 
-  &-split {
+  @include shared.element(split) {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
@@ -198,16 +198,16 @@
   }
 
   .json-value {
-    &[data-type="string"] {
+    &[data-type='string'] {
       color: var(--zk-success);
     }
 
-    &[data-type="number"] {
+    &[data-type='number'] {
       color: var(--zk-warning);
     }
 
-    &[data-type="boolean"],
-    &[data-type="null"] {
+    &[data-type='boolean'],
+    &[data-type='null'] {
       color: var(--primary);
     }
   }
@@ -216,7 +216,7 @@
     background: rgb(var(--primary-rgb) / 20%);
   }
 
-  &-copy {
+  .json-copy {
     @include shared.ghost-button;
   }
 }
@@ -228,16 +228,16 @@
 
   :where(pre) {
     padding: var(--zk-space-3);
-    overflow-x: auto;
-    background: var(--zk-hover);
     border-radius: var(--zk-radius);
+    background: var(--zk-hover);
+    overflow-x: auto;
   }
 
   :where(blockquote) {
-    padding-inline-start: var(--zk-space-3);
     margin-inline: 0;
-    color: var(--zk-muted);
+    padding-inline-start: var(--zk-space-3);
     border-inline-start: 4px solid var(--zk-border-strong);
+    color: var(--zk-muted);
   }
 
   :where(a) {

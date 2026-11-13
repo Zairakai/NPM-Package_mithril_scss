@@ -1,11 +1,12 @@
-@use "sass:color";
-@use "sass:list";
-@use "sass:map";
-@use "sass:math";
-@use "sass:meta";
-@use "sass:string";
-@use "variables" as MithrilVariables;
-@use "functions" as MithrilFunctions;
+@use 'sass:color';
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'sass:string';
+@use 'config' as MithrilConfig;
+@use 'variables' as MithrilVariables;
+@use 'functions' as MithrilFunctions;
 
 /// Mixin to cut corners of an element using a `clip-path` polygon.
 /// This mixin allows you to cut corners of an element in a polygonal shape.
@@ -42,97 +43,86 @@
 /// This mixin applies a box-shadow based on the given elevation level and color.
 ///
 /// @param {number} $elevation - The elevation level (0 or higher).
-/// @param {color} $color - The shadow color (default: `#000`).
-@mixin elevation($elevation: 0, $color: #000) {
-  box-shadow:
-    MithrilFunctions.px-to-rem(MithrilFunctions.get-elevation-value($elevation, 1, "size"))
-      MithrilFunctions.color-alpha($color, MithrilFunctions.get-elevation-value($elevation, 1, "alpha")),
-    MithrilFunctions.px-to-rem(MithrilFunctions.get-elevation-value($elevation, 2, "size"))
-      MithrilFunctions.color-alpha($color, MithrilFunctions.get-elevation-value($elevation, 2, "alpha")),
-    MithrilFunctions.px-to-rem(MithrilFunctions.get-elevation-value($elevation, 3, "size"))
-      MithrilFunctions.color-alpha($color, MithrilFunctions.get-elevation-value($elevation, 3, "alpha"));
+/// @param {color|null} $color - The shadow color. Default: the color of the level in `$elevations`.
+@mixin elevation($elevation: 0, $color: null) {
+  box-shadow: MithrilFunctions.elevation-shadow($elevation, $color);
 }
 
-/// Mixin to handle media queries based on breakpoints and orientation.
-/// This mixin generates media queries for responsive design based on breakpoints.
+/// Wraps what follows in the media query of a width class. Mobile first: the default is
+/// `min-width`, so the rules apply from the class up and only redefine what changes.
+/// `base` is the base, below the first class: its rules are written as they are, with no query.
 ///
-/// @param {string|null} $key - A specific breakpoint key to target (optional).
-/// @param {string|null} $orientation - The orientation (e.g., `portrait`, `landscape`).
-/// @param {string} $range - Range type (e.g., `min`, `max`, `both`).
-@mixin media-queries($key: null, $orientation: null, $range: min) {
-  // prettier-ignore
-  @if $orientation != null and not map.has-key(MithrilVariables.$breakpoints, $orientation) {
-        @error "Orientation '#{$orientation}' not available. Use 'landscape' or 'portrait'.";
-    }
-
-  $breakpoints: MithrilVariables.$breakpoints;
-
-  @if null != $orientation {
-    $breakpoints: map.get(MithrilVariables.$breakpoints, $orientation);
+/// @param {string|null} $key - The width class, or `base`. `null` writes the content for each class.
+/// @param {string} $range - `min` (from the class up), `max` (up to the class) or `both` (this class only).
+/// @content - The rules for that width.
+/// @throws Error if the class does not exist, or the range is not `min`, `max` or `both`.
+@mixin media-queries($key: null, $range: min) {
+  @if not list.index(('min', 'max', 'both'), $range) {
+    @error "Range '#{$range}' not available. Use 'min', 'max' or 'both'.";
   }
 
-  // Parcours des breakpoints pour chaque orientation
-  @if null != $orientation {
-    @each $currentKey, $config in $breakpoints {
-      @if null != $key {
-        @if $currentKey == $key {
-          @include generate-media-query($config, $orientation, $range) {
-            @content;
-          }
-        }
-      } @else {
-        @include generate-media-query($config, $orientation, $range) {
-          @content;
-        }
+  @if 'base' == $key {
+    @content;
+  } @else if null == $key {
+    @each $name, $width in MithrilVariables.$breakpoints {
+      @include media-queries($name, $range) {
+        @content;
       }
     }
   } @else {
-    @each $direction, $sizes in $breakpoints {
-      @each $currentKey, $config in $sizes {
-        @if null != $key {
-          @if $currentKey == $key {
-            @include generate-media-query($config, $direction, $range) {
-              @content;
-            }
-          }
-        } @else {
-          @include generate-media-query($config, $direction, $range) {
-            @content;
-          }
-        }
+    $conditions: ();
+    $min: MithrilFunctions.breakpoint-min($key);
+    $max: MithrilFunctions.breakpoint-max($key);
+
+    @if 'min' == $range or 'both' == $range {
+      $conditions: list.append(
+        $conditions,
+        '(min-width: #{MithrilFunctions.px-to-rem($min)})'
+      );
+    }
+
+    @if ('max' == $range or 'both' == $range) and null != $max {
+      $conditions: list.append(
+        $conditions,
+        '(max-width: #{MithrilFunctions.px-to-rem($max)})'
+      );
+    }
+
+    @if list.length($conditions) == 0 {
+      @content;
+    } @else {
+      $query: list.nth($conditions, 1);
+
+      @if list.length($conditions) > 1 {
+        $query: '#{$query} and #{list.nth($conditions, 2)}';
+      }
+
+      @media #{$query} {
+        @content;
       }
     }
   }
 }
 
-/// Helper mixin to generate a media query.
-/// This mixin is used to wrap content inside a media query based on breakpoints and orientation.
+/// Wraps what follows in the media query of a height class, for the wide but short screens
+/// (a phone in landscape). Mobile first like `media-queries()`: from the height up.
 ///
-/// @param {map} $config - The breakpoint configuration map (includes `min-width` and `max-width`).
-/// @param {string} $direction - Orientation type (`portrait`, `landscape`).
-/// @param {string} $range - The range type (`min`, `max`, `both`).
-/// @content - Content to be wrapped inside the media query.
-@mixin generate-media-query($config, $direction, $range) {
-  $media-query: "";
-
-  @if "min" == $range or "both" == $range {
-    $min-width: MithrilFunctions.px-to-rem(map.get($config, min-width));
-    $media-query: "#{$media-query} (min-width: #{$min-width})";
-  }
-
-  @if "max" == $range or "both" == $range {
-    @if "" != $media-query {
-      $media-query: "#{$media-query} and ";
+/// @param {string} $key - The height class (`medium`, `expanded`), or `base`.
+/// @content - The rules for that height.
+/// @throws Error if the class does not exist.
+@mixin media-queries-height($key) {
+  @if 'base' == $key {
+    @content;
+  } @else {
+    @if not map.has-key(MithrilVariables.$breakpoints-height, $key) {
+      @error "Height breakpoint '#{$key}' not found. Available: #{map.keys(MithrilVariables.$breakpoints-height)}.";
     }
 
-    $max-width: MithrilFunctions.px-to-rem(map.get($config, max-width));
-    $media-query: "#{$media-query}(max-width: #{$max-width})";
-  }
+    $min: map.get(MithrilVariables.$breakpoints-height, $key);
 
-  $media-query: "#{$media-query} and (orientation: #{$direction})";
-
-  @media #{$media-query} {
-    @content;
+    @media (min-height: #{MithrilFunctions.px-to-rem($min)}) {
+      @content;
+    }
   }
 }
 
@@ -140,7 +130,7 @@
 /// This mixin allows you to apply different shapes (e.g., circle, rounded) to elements.
 ///
 /// @param {string} $shape - The shape name (e.g., `medium`, `full`) or a raw px value.
-///   Only base keys are valid — directional variants (e.g., `medium-top`) are not supported.
+///   Only base keys are valid - directional variants (e.g., `medium-top`) are not supported.
 /// @param {string|null} $cornerOrSide - A specific corner or side to apply the shape (optional).
 /// @param {string|null} $symmetry - Mirror the radius across an axis: `horizontal`, `vertical`, or `diagonal` (optional).
 ///   Most useful with a single-corner `$cornerOrSide`. Has no effect when `$cornerOrSide` is null.
@@ -152,7 +142,7 @@
     $radius: map.get(MithrilVariables.$shape-radius, $shape);
   }
 
-  @if "%" != math.unit($radius) {
+  @if '%' != math.unit($radius) {
     $radius: MithrilFunctions.px-to-rem($radius);
   }
 
@@ -161,24 +151,24 @@
   $bottom-left: 0;
   $bottom-right: 0;
 
-  @if "top-left" == $cornerOrSide {
+  @if 'top-left' == $cornerOrSide {
     $top-left: $radius;
-  } @else if "top-right" == $cornerOrSide {
+  } @else if 'top-right' == $cornerOrSide {
     $top-right: $radius;
-  } @else if "bottom-left" == $cornerOrSide {
+  } @else if 'bottom-left' == $cornerOrSide {
     $bottom-left: $radius;
-  } @else if "bottom-right" == $cornerOrSide {
+  } @else if 'bottom-right' == $cornerOrSide {
     $bottom-right: $radius;
-  } @else if "top" == $cornerOrSide {
+  } @else if 'top' == $cornerOrSide {
     $top-left: $radius;
     $top-right: $radius;
-  } @else if "right" == $cornerOrSide {
+  } @else if 'right' == $cornerOrSide {
     $top-right: $radius;
     $bottom-right: $radius;
-  } @else if "bottom" == $cornerOrSide {
+  } @else if 'bottom' == $cornerOrSide {
     $bottom-left: $radius;
     $bottom-right: $radius;
-  } @else if "left" == $cornerOrSide {
+  } @else if 'left' == $cornerOrSide {
     $top-left: $radius;
     $bottom-left: $radius;
   } @else if null == $cornerOrSide {
@@ -220,34 +210,50 @@
   width: 0;
   height: 0;
 
-  @if "up" == $direction {
-    border-left: MithrilFunctions.px-to-rem(math.div($size, 2)) solid transparent;
-    border-right: MithrilFunctions.px-to-rem(math.div($size, 2)) solid transparent;
+  @if 'up' == $direction {
+    border-right: MithrilFunctions.px-to-rem(math.div($size, 2))
+      solid
+      transparent;
     border-bottom: MithrilFunctions.px-to-rem($size) solid $color;
-  } @else if "right" == $direction {
-    border-top: MithrilFunctions.px-to-rem(math.div($size, 2)) solid transparent;
-    border-bottom: MithrilFunctions.px-to-rem(math.div($size, 2)) solid transparent;
+    border-left: MithrilFunctions.px-to-rem(math.div($size, 2))
+      solid
+      transparent;
+  } @else if 'right' == $direction {
+    border-top: MithrilFunctions.px-to-rem(math.div($size, 2))
+      solid
+      transparent;
+    border-bottom: MithrilFunctions.px-to-rem(math.div($size, 2))
+      solid
+      transparent;
     border-left: MithrilFunctions.px-to-rem($size) solid $color;
-  } @else if "down" == $direction {
-    border-left: MithrilFunctions.px-to-rem(math.div($size, 2)) solid transparent;
-    border-right: MithrilFunctions.px-to-rem(math.div($size, 2)) solid transparent;
+  } @else if 'down' == $direction {
     border-top: MithrilFunctions.px-to-rem($size) solid $color;
-  } @else if "left" == $direction {
-    border-top: MithrilFunctions.px-to-rem(math.div($size, 2)) solid transparent;
-    border-bottom: MithrilFunctions.px-to-rem(math.div($size, 2)) solid transparent;
+    border-right: MithrilFunctions.px-to-rem(math.div($size, 2))
+      solid
+      transparent;
+    border-left: MithrilFunctions.px-to-rem(math.div($size, 2))
+      solid
+      transparent;
+  } @else if 'left' == $direction {
+    border-top: MithrilFunctions.px-to-rem(math.div($size, 2))
+      solid
+      transparent;
     border-right: MithrilFunctions.px-to-rem($size) solid $color;
-  } @else if "top-right" == $direction {
+    border-bottom: MithrilFunctions.px-to-rem(math.div($size, 2))
+      solid
+      transparent;
+  } @else if 'top-right' == $direction {
     border-bottom: MithrilFunctions.px-to-rem($size) solid $color;
     border-left: MithrilFunctions.px-to-rem($size) solid transparent;
-  } @else if "bottom-right" == $direction {
+  } @else if 'bottom-right' == $direction {
     border-top: MithrilFunctions.px-to-rem($size) solid $color;
     border-left: MithrilFunctions.px-to-rem($size) solid transparent;
-  } @else if "bottom-left" == $direction {
+  } @else if 'bottom-left' == $direction {
     border-top: MithrilFunctions.px-to-rem($size) solid $color;
     border-right: MithrilFunctions.px-to-rem($size) solid transparent;
-  } @else if "top-left" == $direction {
-    border-bottom: MithrilFunctions.px-to-rem($size) solid $color;
+  } @else if 'top-left' == $direction {
     border-right: MithrilFunctions.px-to-rem($size) solid transparent;
+    border-bottom: MithrilFunctions.px-to-rem($size) solid $color;
   } @else {
     @error "Invalid direction `#{$direction}`. Valid directions are: up, right, down, left, top-right, bottom-right, bottom-left, top-left.";
   }
@@ -260,23 +266,34 @@
 /// @param {string} $justify - Justification of flex items (e.g., `flex-start`, `center`). Default is `flex-start`.
 /// @param {string} $align - Alignment of flex items (e.g., `stretch`, `center`). Default is `stretch`.
 /// @param {string} $wrap - Wrapping behavior for flex items (e.g., `nowrap`, `wrap`). Default is `nowrap`.
-@mixin flexbox($direction: row, $justify: flex-start, $align: stretch, $wrap: nowrap) {
+@mixin flexbox(
+  $direction: row,
+  $justify: flex-start,
+  $align: stretch,
+  $wrap: nowrap
+) {
   display: flex;
+  flex-flow: $direction $wrap;
   justify-content: $justify;
   align-items: $align;
-  flex-flow: $direction $wrap;
 }
 
 /// Mixin to create a responsive grid layout.
 /// This mixin generates a grid with customizable columns and gaps, suitable for responsive designs.
 ///
 /// @param {number} $columns - Number of columns (default is `$default-grid-columns`).
-/// @param {string|number} $gap - Gap size (default is small spacing using `get-spacing()` function).
-@mixin grid($columns: MithrilVariables.$default-grid-columns, $gap: MithrilFunctions.get-spacing("sm", true)) {
+/// @param {string|number|null} $gap - Gap size. Default: the gap of the base grid in `$grids`.
+@mixin grid($columns: MithrilConfig.$default-grid-columns, $gap: null) {
+  $gap-value: map.get(map.get(MithrilVariables.$grids, base), gap);
+
+  @if null != $gap {
+    $gap-value: $gap;
+  }
+
   display: grid;
-  grid-template-columns: repeat($columns, 1fr);
   grid-template-rows: auto;
-  gap: MithrilFunctions.px-to-rem($gap);
+  grid-template-columns: repeat($columns, 1fr);
+  gap: MithrilFunctions.px-to-rem($gap-value);
 }
 
 /// Mixin to add padding to an element.
@@ -338,9 +355,28 @@
   }
 }
 
-/// Mixin to generate semantic theme CSS custom properties.
-/// Outputs --primary, --primary-rgb, --on-primary, --secondary, --surface, etc. at :root level.
-/// Call once in :root {}. Pass a partial map to override only specific tokens.
+/// Writes a CSS custom property, and its `-rgb` twin when the value is a color.
+/// The twin holds the channels (`--primary-rgb: 69 90 100`), so that the color can take an opacity:
+/// `rgb(var(--primary-rgb) / 0.5)`.
+///
+/// @param {string} $name - The name of the custom property, without the leading dashes.
+/// @param {any} $value - The value. A color of any format also gets the `-rgb` twin.
+@mixin color-token($name, $value) {
+  --#{$name}: #{$value};
+
+  @if 'color' == meta.type-of($value) {
+    $channels: MithrilFunctions.color-rgb($value, false);
+    $red: map.get($channels, red);
+    $green: map.get($channels, green);
+    $blue: map.get($channels, blue);
+
+    --#{$name}-rgb: #{$red} #{$green} #{$blue};
+  }
+}
+
+/// Writes the semantic theme tokens as CSS custom properties, each color with its `-rgb` twin:
+/// `--primary`, `--primary-rgb`, `--on-primary`, `--secondary`, `--surface`, etc.
+/// Call it once, in `:root`. Pass a partial map to override only some of the tokens.
 ///
 /// Default tokens (all map to Material palette values):
 ///   primary, primary-variant, on-primary,
@@ -348,34 +384,47 @@
 ///   surface, on-surface, background, on-background,
 ///   error, on-error
 ///
-/// @param {map} $overrides - Partial map of token → color to override defaults (optional).
+/// Reference the tokens in SCSS with `fn.theme()`, and use the `-rgb` twin to give a color an opacity.
 ///
-/// @example
+/// It also writes the roles of Material 3 that come from these colors (`primary-container`,
+/// `surface-container-*`, `outline`, `inverse-surface`...), with the tone of the mode: see
+/// `$theme-roles` and `color-tone()`.
+///
+/// @param {map} $overrides - Partial map of token and color to override the defaults (optional).
+/// @param {string} $mode - `light` (default) or `dark`: the tones of the roles.
+///
+/// @example scss
 ///   :root { @include mx.generate-theme(); }
 ///   :root { @include mx.generate-theme((primary: #ff5722, on-primary: #fff)); }
 ///
-/// Reference tokens in SCSS via fn.theme():
-///   background: fn.theme("primary");  // → var(--primary)
-///   color: rgb(var(--primary-rgb) / 0.8);
-@mixin generate-theme($overrides: ()) {
+///   .button {
+///     background: fn.theme("primary");          // var(--primary)
+///     box-shadow: 0 0 0 4px rgb(var(--primary-rgb) / 0.3);
+///   }
+@mixin generate-theme($overrides: (), $mode: light) {
   $resolved: map.merge(MithrilVariables.$theme, $overrides);
 
   @each $token, $color in $resolved {
-    --#{$token}: #{$color};
+    @include color-token($token, $color);
+  }
 
-    // stylelint-disable-next-line scss/operator-no-newline-after
-    @if 1 ==
-      string.index(meta.inspect($color), "#") and
-      (7 == string.length(meta.inspect($color)) or 4 == string.length(meta.inspect($color)))
-    {
-      $rgb-map: MithrilFunctions.color-rgb($color, false);
+  // The roles of Material 3 that come from these colors, in the tone of the mode.
+  @each $role, $recipe in map.get(MithrilVariables.$theme-roles, $mode) {
+    $source: list.nth($recipe, 1);
+    $tone: list.nth($recipe, 2);
+    $base: #9e9e9e;
 
-      --#{$token}-rgb: #{map.get($rgb-map, red)} #{map.get($rgb-map, green)} #{map.get($rgb-map, blue)};
+    @if map.has-key($resolved, $source) {
+      $base: map.get($resolved, $source);
     }
+
+    @include color-token($role, MithrilFunctions.color-tone($base, $tone));
   }
 }
 
-/// Mixin pour exporter les variables CSS
+/// Exports the design tokens that the stylesheets use as CSS custom properties on `:root`.
+///
+/// @param {map|null} $data - Extra tokens to export, as a map of name and value (optional).
 @mixin export-css-variables($data: null) {
   $used-vars: MithrilVariables.get-used-variables();
 
@@ -386,6 +435,7 @@
       @include export-grid($used-vars);
       @include export-spacings($used-vars);
       @include export-typography($used-vars);
+      @include export-type-scale($used-vars);
       @include export-shapes($used-vars);
       @include export-elevations($used-vars);
       @include export-states($used-vars);
@@ -399,97 +449,147 @@
   }
 }
 
+/// Tells if a token is in the list of the tokens in use.
+///
+/// @param {string} $var-name - The name of the token, without the leading dashes.
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
+/// @return {boolean} - `true` when the token is in use.
 @function is-used($var-name, $used-vars) {
   @return list.index($used-vars, $var-name) != null;
 }
 
+/// Writes a CSS custom property only when the token is in use.
+///
+/// @param {string} $var-name - The name of the token, without the leading dashes.
+/// @param {any} $value - The value to write.
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-if-used($var-name, $value, $used-vars) {
   @if is-used($var-name, $used-vars) {
     --#{$var-name}: #{$value};
   }
 }
 
+/// Writes the breakpoints, in rem, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `breakpoint-<class>` for the width, `breakpoint-height-<class>` for the height.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-breakpoints($used-vars) {
-  @each $orientation, $valueMaps in MithrilVariables.$breakpoints {
-    @each $keySize, $valueSizes in $valueMaps {
-      @each $key, $value in $valueSizes {
-        @include export-if-used(
-          "breakpoint-#{$orientation}-#{$keySize}-#{$key}",
-          MithrilFunctions.px-to-rem($value),
-          $used-vars
-        );
-      }
-    }
+  @each $key, $value in MithrilVariables.$breakpoints {
+    @include export-if-used(
+      'breakpoint-#{$key}',
+      MithrilFunctions.px-to-rem($value),
+      $used-vars
+    );
+  }
+
+  @each $key, $value in MithrilVariables.$breakpoints-height {
+    @include export-if-used(
+      'breakpoint-height-#{$key}',
+      MithrilFunctions.px-to-rem($value),
+      $used-vars
+    );
   }
 }
 
+/// Writes the container widths, in rem, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `container-<class>`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-containers($used-vars) {
-  @each $orientation, $valueMaps in MithrilVariables.$containers {
-    @each $key, $value in $valueMaps {
-      @include export-if-used("container-#{$orientation}-#{$key}", MithrilFunctions.px-to-rem($value), $used-vars);
-    }
+  @each $key, $value in MithrilVariables.$containers {
+    @include export-if-used(
+      'container-#{$key}',
+      MithrilFunctions.length-to-rem($value),
+      $used-vars
+    );
   }
 }
 
+/// Writes the number of columns, the gaps and the margins of the grid, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `grid-cols-<n>` and `grid-<class>-<cols|gap|margin>`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-grid($used-vars) {
   @for $i from 1 to 13 {
-    @include export-if-used("grid-cols-#{$i}", $i, $used-vars);
+    @include export-if-used('grid-cols-#{$i}', $i, $used-vars);
   }
 
-  @each $orientation, $valueMaps in MithrilVariables.$grids {
-    @each $keySize, $valueSizes in $valueMaps {
-      @each $key, $value in $valueSizes {
-        $var-name: "grid-#{$orientation}-#{$keySize}-#{$key}";
-        $var-value: $value;
-
-        @if "gap" == $key {
-          $var-value: MithrilFunctions.px-to-rem($value);
-        }
-
-        @include export-if-used($var-name, $var-value, $used-vars);
-      }
+  @each $key, $properties in MithrilVariables.$grids {
+    @each $property, $value in $properties {
+      @include export-if-used(
+        'grid-#{$key}-#{$property}',
+        MithrilFunctions.length-to-rem($value),
+        $used-vars
+      );
     }
   }
 }
 
+/// Writes the spacing scale, in rem, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `spacing-<key>`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-spacings($used-vars) {
   @each $key, $value in MithrilVariables.$spacings {
-    @include export-if-used("spacing-#{$key}", MithrilFunctions.px-to-rem($value), $used-vars);
+    @include export-if-used(
+      'spacing-#{$key}',
+      MithrilFunctions.px-to-rem($value),
+      $used-vars
+    );
   }
 }
 
+/// Writes the opacity levels, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `opacity-<key>`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-opacity($used-vars) {
   @each $key, $value in MithrilVariables.$opacity {
-    @include export-if-used("opacity-#{$key}", $value, $used-vars);
+    @include export-if-used('opacity-#{$key}', $value, $used-vars);
   }
 }
 
+/// Writes the font families, weights, sizes, line heights, letter spacings, fluid sizes and headings, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `typo-<ff|fw|fs|lh|ls>-<key>`, `font-size-fluid-<key>` and `h<level>-<property>`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-typography($used-vars) {
   $typography-map: (
-    "ff": MithrilVariables.$font-family,
-    "fw": MithrilVariables.$font-weight,
-    "fs": MithrilVariables.$font-size,
-    "lh": MithrilVariables.$line-height,
-    "ls": MithrilVariables.$letter-spacings,
+    'ff': MithrilVariables.$font-family,
+    'fw': MithrilVariables.$font-weight,
+    'fs': MithrilVariables.$font-size,
+    'lh': MithrilVariables.$line-height,
+    'ls': MithrilVariables.$letter-spacings,
   );
 
   @each $type, $values in $typography-map {
     @each $key, $value in $values {
       $var-value: $value;
 
-      @if "fs" == $type or "lh" == $type {
+      @if 'fs' == $type {
         $var-value: MithrilFunctions.px-to-rem($value);
-      } @else if "ls" == $type and "number" == meta.type-of($value) and 0 != $value and math.is-unitless($value) {
-        // Non-zero, unitless letter-spacing values need a unit to be valid CSS
-        $var-value: $value * 1px;
+      } @else if 'lh' == $type or 'ls' == $type {
+        $var-value: MithrilFunctions.length-to-rem($value);
       }
 
-      @include export-if-used("typo-#{$type}-#{$key}", $var-value, $used-vars);
+      @include export-if-used('typo-#{$type}-#{$key}', $var-value, $used-vars);
     }
   }
 
   @each $key, $valueMaps in MithrilVariables.$font-size-fluid {
-    $var-name: "font-size-fluid-#{$key}";
+    $var-name: 'font-size-fluid-#{$key}';
     $var-value: clamp(
       #{MithrilFunctions.px-to-rem(map.get($valueMaps, min))},
       #{map.get($valueMaps, fluid)},
@@ -500,91 +600,143 @@
   }
 
   @each $key, $valueMaps in MithrilVariables.$headings {
-    @include export-if-used("h#{$key}-line-height", map.get($valueMaps, line-height), $used-vars);
-    @include export-if-used("h#{$key}-margin", MithrilFunctions.px-to-rem(map.get($valueMaps, margin)), $used-vars);
-    @include export-if-used("h#{$key}-padding", MithrilFunctions.px-to-rem(map.get($valueMaps, padding)), $used-vars);
-    @include export-if-used("h#{$key}-font-size", var(--font-size-fluid-h#{$key}), $used-vars);
-    @include export-if-used("h#{$key}-letter-spacing", map.get($valueMaps, spacing), $used-vars);
-    @include export-if-used("h#{$key}-font-weight", map.get($valueMaps, weight), $used-vars);
+    @include export-if-used(
+      'h#{$key}-line-height',
+      MithrilFunctions.get-heading($key, line-height),
+      $used-vars
+    );
+    @include export-if-used(
+      'h#{$key}-margin',
+      MithrilFunctions.px-to-rem(map.get($valueMaps, margin)),
+      $used-vars
+    );
+    @include export-if-used(
+      'h#{$key}-padding',
+      MithrilFunctions.px-to-rem(map.get($valueMaps, padding)),
+      $used-vars
+    );
+    @include export-if-used(
+      'h#{$key}-font-size',
+      var(--font-size-fluid-h#{$key}),
+      $used-vars
+    );
+    @include export-if-used(
+      'h#{$key}-letter-spacing',
+      MithrilFunctions.get-heading($key, spacing),
+      $used-vars
+    );
+    @include export-if-used(
+      'h#{$key}-font-weight',
+      MithrilFunctions.get-heading($key, weight),
+      $used-vars
+    );
   }
 }
 
-@mixin export-shapes($used-vars) {
-  @each $key, $value in MithrilVariables.$shape-radius {
-    $var-value: MithrilFunctions.px-to-rem($value);
-
-    @include export-if-used("shape-#{$key}", $var-value, $used-vars);
-  }
-}
-
-@mixin export-elevations($used-vars) {
-  @each $key, $value in MithrilVariables.$elevations {
-    $var-name: "elevation-#{$key}";
-
-    @if is-used($var-name, $used-vars) {
-      $shadows: ();
-
-      @each $step, $properties in $value {
-        $shadows: list.append(
-          $shadows,
-          #{MithrilFunctions.px-to-rem(map.get($properties, size))}
-            #{MithrilFunctions.color-alpha(map.get($properties, color), map.get($properties, alpha))}
-        );
-      }
-
-      $combined-shadow: list.join($shadows, (), $separator: comma);
-
-      --#{$var-name}: #{$combined-shadow};
+/// Writes the styles of the type scale, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `type-<style>-font|size|line-height|tracking|weight|emphasized-weight`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
+@mixin export-type-scale($used-vars) {
+  @each $role, $style in MithrilVariables.$type-scale {
+    @each $property
+      in (font, size, line-height, tracking, weight, emphasized-weight)
+    {
+      @include export-if-used(
+        'type-#{$role}-#{$property}',
+        MithrilFunctions.get-type($role, $property),
+        $used-vars
+      );
     }
   }
 }
 
+/// Writes the shape radii, in rem, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `shape-<key>`, and `shape-<key>-top|end|bottom|start` for the corners of one side.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
+@mixin export-shapes($used-vars) {
+  @each $key, $value in MithrilVariables.$shape-radius {
+    $radius: MithrilFunctions.px-to-rem($value);
+    $none: 0;
+    $variants: (
+      'top': $radius $radius $none $none,
+      'end': $none $radius $radius $none,
+      'bottom': $none $none $radius $radius,
+      'start': $radius $none $none $radius,
+    );
+
+    @include export-if-used('shape-#{$key}', $radius, $used-vars);
+
+    @each $side, $corners in $variants {
+      @include export-if-used('shape-#{$key}-#{$side}', $corners, $used-vars);
+    }
+  }
+}
+
+/// Writes the elevations, as a `box-shadow` value, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `elevation-<level>`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
+@mixin export-elevations($used-vars) {
+  @each $key, $value in MithrilVariables.$elevations {
+    @include export-if-used(
+      'elevation-#{$key}',
+      MithrilFunctions.elevation-shadow($key),
+      $used-vars
+    );
+  }
+}
+
+/// Writes the state opacities, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `<key>`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-states($used-vars) {
   @each $key, $value in MithrilVariables.$states {
     @include export-if-used($key, $value, $used-vars);
   }
 }
 
+/// Writes the colors of the palette, each with its `-rgb` twin, for the tokens in use only.
+/// Called by `export-css-variables()`.
+///
+/// Names: `<family>` and `<family>-<shade>`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
 @mixin export-colors($used-vars) {
   @each $key-color, $map-color in MithrilVariables.$colors {
     @each $key, $hexa in $map-color {
-      $var-name: "#{$key-color}-#{$key}";
+      $var-name: '#{$key-color}-#{$key}';
 
-      @if "default" == $key {
+      @if 'default' == $key {
         $var-name: $key-color;
       }
 
       @if is-used($var-name, $used-vars) {
-        --#{$var-name}: #{$hexa};
-
-        // stylelint-disable-next-line scss/operator-no-newline-after
-        @if 1 ==
-          string.index(meta.inspect($hexa), "#") and
-          (7 == string.length(meta.inspect($hexa)) or 4 == string.length(meta.inspect($hexa)))
-        {
-          $rgb-map: MithrilFunctions.color-rgb($hexa, false);
-
-          --#{$var-name}-rgb: #{map.get($rgb-map, red)} #{map.get($rgb-map, green)} #{map.get($rgb-map, blue)};
-        }
+        @include color-token($var-name, $hexa);
       }
     }
   }
 }
 
+/// Writes the tokens of the application that are in use, each color with its `-rgb` twin.
+/// Called by `export-css-variables()`.
+///
+/// @param {list} $used-vars - The tokens in use, from `get-used-variables()`.
+/// @param {map} $data - The tokens of the application, as a map of name and value.
 @mixin export-data($used-vars, $data) {
-  @each $key, $hexa in $data {
+  @each $key, $value in $data {
     @if is-used($key, $used-vars) {
-      --#{$key}: #{$hexa};
-
-      // stylelint-disable-next-line scss/operator-no-newline-after
-      @if 1 ==
-        string.index(meta.inspect($hexa), "#") and
-        (7 == string.length(meta.inspect($hexa)) or 4 == string.length(meta.inspect($hexa)))
-      {
-        $rgb-map: MithrilFunctions.color-rgb($hexa, false);
-
-        --#{$key}-rgb: #{map.get($rgb-map, red)} #{map.get($rgb-map, green)} #{map.get($rgb-map, blue)};
-      }
+      @include color-token($key, $value);
     }
   }
 }
@@ -599,18 +751,18 @@
 
   $value: MithrilFunctions.px-to-rem($value);
 
-  @if "t" == $direction {
+  @if 't' == $direction {
     padding-top: $value;
-  } @else if "r" == $direction {
+  } @else if 'r' == $direction {
     padding-right: $value;
-  } @else if "b" == $direction {
+  } @else if 'b' == $direction {
     padding-bottom: $value;
-  } @else if "l" == $direction {
+  } @else if 'l' == $direction {
     padding-left: $value;
-  } @else if "v" == $direction {
+  } @else if 'v' == $direction {
     padding-top: $value;
     padding-bottom: $value;
-  } @else if "h" == $direction {
+  } @else if 'h' == $direction {
     padding-right: $value;
     padding-left: $value;
   } @else {
@@ -618,29 +770,107 @@
   }
 }
 
-/// Shorthand alias for media-queries — more readable in consumer code.
+/// Short name of `media-queries()`.
 ///
-/// @param {string|null} $key - A specific breakpoint key to target (optional).
-/// @param {string|null} $orientation - The orientation ('portrait' or 'landscape').
-/// @param {string} $range - Range type ('min', 'max', or 'both'). Default: 'min'.
-@mixin respond-to($key: null, $orientation: null, $range: min) {
-  @include media-queries($key, $orientation, $range) {
+/// @param {string|null} $key - The width class (optional).
+/// @param {string} $range - `min`, `max` or `both`. Default: `min`.
+@mixin respond-to($key: null, $range: min) {
+  @include media-queries($key, $range) {
     @content;
   }
 }
 
-/// Mixin to constrain an element to a container max-width for a given breakpoint.
+/// Mixin to constrain an element to the container width of a width class.
 ///
-/// @param {string} $key - The container breakpoint key (e.g., 'laptop', 'desktop').
-/// @param {string} $orientation - The orientation ('portrait' or 'landscape').
-@mixin container($key, $orientation) {
-  max-width: MithrilFunctions.get-container($key, $orientation);
+/// @param {string} $key - The width class (`medium`, `expanded`...).
+@mixin container($key) {
+  max-width: MithrilFunctions.get-container($key);
   margin-inline: auto;
 }
 
-/// Mixin to apply all heading styles for a given level (1–6).
+/// Starts an animation of `animations.scss`. The timing is the one of `$motion` (what enters is slower
+/// and decelerates, what leaves is faster and accelerates); give a parameter to change it for this
+/// call only. It stops for the readers who asked for less motion.
+///
+/// The `animations` stylesheet has to be loaded for the keyframes to exist.
+///
+/// @param {string} $name - The animation, from `$animations` (`fade-in`, `slide-up-out`, `spin`...).
+/// @param {string|null} $duration - A key of `$durations`, or a time. Default: from `$motion`.
+/// @param {string|null} $easing - A key of `$easings`, or a curve. Default: from `$motion`.
+/// @param {string|number|null} $iteration - How many times, or `infinite`. Default: `1`.
+/// @param {number|null} $delay - A time to wait before it starts. Default: `0s`.
+/// @throws {Error} If the animation, the duration or the easing does not exist.
+///
+/// @example scss
+///   .panel { @include mx.animate(slide-up-in); }
+///   .reset { @include mx.animate(fade-in, $duration: short2, $delay: 80ms); }
+///   .panel-leaving { @include mx.animate(fade-out); }
+@mixin animate(
+  $name,
+  $duration: null,
+  $easing: null,
+  $iteration: null,
+  $delay: null
+) {
+  @if not list.index(MithrilVariables.$animations, $name) {
+    @error "Animation '#{$name}' not found. Available: #{MithrilVariables.$animations}.";
+  }
+
+  $motion: enter;
+
+  @if string.slice('#{$name}', -4) == '-out' {
+    $motion: exit;
+  }
+
+  $duration-value: MithrilFunctions.get-motion($motion, duration);
+  $easing-value: MithrilFunctions.get-motion($motion, easing);
+
+  @if null != $duration {
+    @if map.has-key(MithrilVariables.$durations, $duration) {
+      $duration-value: map.get(MithrilVariables.$durations, $duration);
+    } @else if 'number' == meta.type-of($duration) {
+      $duration-value: $duration;
+    } @else {
+      @error "Duration '#{$duration}' not found. Available: #{map.keys(MithrilVariables.$durations)}.";
+    }
+  }
+
+  @if null != $easing {
+    @if map.has-key(MithrilVariables.$easings, $easing) {
+      $easing-value: map.get(MithrilVariables.$easings, $easing);
+    } @else if
+      meta.type-of($easing) == 'string' and not
+      string.index($easing, '(')
+    {
+      @error "Easing '#{$easing}' not found. Available: #{map.keys(MithrilVariables.$easings)}.";
+    } @else {
+      $easing-value: $easing;
+    }
+  }
+
+  $iteration-value: 1;
+
+  @if null != $iteration {
+    $iteration-value: $iteration;
+  }
+
+  $delay-value: 0s;
+
+  @if null != $delay {
+    $delay-value: $delay;
+  }
+
+  animation: zk-#{$name} $duration-value $easing-value $delay-value
+    $iteration-value both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/// Mixin to apply all heading styles for a given level (1-6).
 /// Outputs margin, padding, line-height, font-weight, and letter-spacing.
-/// Font size is NOT included — pair with mx.text-fluid('h1') if needed.
+/// Font size is NOT included - pair with mx.text-fluid('h1') if needed.
 ///
 /// @param {number} $level - The heading level (1 to 6).
 /// @throws {Error} If the heading level does not exist.
@@ -649,13 +879,32 @@
     @error "Heading level '#{$level}' not found. Valid levels are 1 to 6.";
   }
 
-  $h: map.get(MithrilVariables.$headings, $level);
+  margin: MithrilFunctions.get-heading($level, margin);
+  padding: MithrilFunctions.get-heading($level, padding);
+  font-weight: MithrilFunctions.get-heading($level, weight);
+  line-height: MithrilFunctions.get-heading($level, line-height);
+  letter-spacing: MithrilFunctions.get-heading($level, spacing);
+}
 
-  margin: MithrilFunctions.px-to-rem(map.get($h, margin));
-  padding: MithrilFunctions.px-to-rem(map.get($h, padding));
-  line-height: map.get($h, line-height);
-  font-weight: map.get($h, weight);
-  letter-spacing: map.get($h, spacing);
+/// Mixin to apply a style of the Material 3 type scale: font, size, line height, tracking and weight,
+/// in rem so they follow the base font size.
+///
+/// @param {string} $role - The style (`display-large`, `body-medium`, `label-small`...).
+/// @param {boolean} $emphasized - The emphasized style of the role: heavier, for the selected, the
+///   active or the important. Default: `false`.
+/// @throws {Error} If the style does not exist.
+@mixin type($role, $emphasized: false) {
+  $weight: weight;
+
+  @if $emphasized {
+    $weight: emphasized-weight;
+  }
+
+  font-family: MithrilFunctions.get-type($role, font);
+  font-size: MithrilFunctions.get-type($role, size);
+  font-weight: MithrilFunctions.get-type($role, $weight);
+  line-height: MithrilFunctions.get-type($role, line-height);
+  letter-spacing: MithrilFunctions.get-type($role, tracking);
 }
 
 /// Mixin to apply a font-size from the $font-size map.
@@ -667,7 +916,9 @@
     @error "Font size '#{$key}' not found.";
   }
 
-  font-size: MithrilFunctions.px-to-rem(map.get(MithrilVariables.$font-size, $key));
+  font-size: MithrilFunctions.px-to-rem(
+    map.get(MithrilVariables.$font-size, $key)
+  );
 }
 
 /// Mixin to apply a fluid font-size using clamp() from the $font-size-fluid map.
@@ -681,7 +932,11 @@
 
   $entry: map.get(MithrilVariables.$font-size-fluid, $key);
 
-  font-size: MithrilFunctions.calculate-fluid-font(map.get($entry, min), map.get($entry, fluid), map.get($entry, max));
+  font-size: MithrilFunctions.calculate-fluid-font(
+    map.get($entry, min),
+    map.get($entry, fluid),
+    map.get($entry, max)
+  );
 }
 
 /// Mixin to apply a line-height from the $line-height map.
@@ -696,7 +951,7 @@
 
   $value: map.get(MithrilVariables.$line-height, $key);
 
-  @if "number" == meta.type-of($value) and "px" == math.unit($value) {
+  @if 'number' == meta.type-of($value) and 'px' == math.unit($value) {
     line-height: MithrilFunctions.px-to-rem($value);
   } @else {
     line-height: $value;
@@ -709,17 +964,17 @@
 ///
 /// @param {string} $state - The interaction state: 'hover', 'focus', or 'pressed'. Default: 'hover'.
 /// @throws {Error} If the state is not valid.
-@mixin state-layer($state: "hover") {
-  $key: "state-#{$state}-state-layer-opacity";
+@mixin state-layer($state: 'hover') {
+  $key: 'state-#{$state}-state-layer-opacity';
 
   @if not map.has-key(MithrilVariables.$states, $key) {
-    @error "State '#{$state}' not found. Valid states are 'hover', 'focus', 'pressed'.";
+    @error "State '#{$state}' not found. Valid states are 'hover', 'focus', 'pressed', 'dragged'.";
   }
 
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     inset: 0;
     background-color: currentcolor;
@@ -728,12 +983,73 @@
   }
 }
 
+/// The ripple of a press, in CSS only: a soft circle fades in under the finger or the pointer and
+/// out when it is released, with the opacity of the pressed state of Material 3 and the gradient of
+/// the `md-ripple` of Material Web. It is centered; set `--ripple-x` and `--ripple-y` (in %) on
+/// the element to make it start where the press happened.
+///
+/// It needs no JavaScript, and it is not written for the readers who ask for less motion or use
+/// forced colors.
+///
+/// @param {color} $color - The color of the ripple. Default: the color of the text.
+/// @param {number|null} $press - How long it takes to show on the press. Default: from `$motion`.
+/// @param {number|null} $release - How long it takes to fade out. Default: from `$motion`.
+@mixin ripple($color: currentcolor, $press: null, $release: null) {
+  $press-duration: MithrilFunctions.get-motion(ripple-press, duration);
+  $release-duration: MithrilFunctions.get-motion(ripple-release, duration);
+
+  @if null != $press {
+    $press-duration: $press;
+  }
+
+  @if null != $release {
+    $release-duration: $release;
+  }
+
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      closest-side circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
+      $color max(calc(100% - 70px), 65%),
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity $release-duration linear;
+    pointer-events: none;
+  }
+
+  &:active::after {
+    opacity: map.get(
+      MithrilVariables.$states,
+      state-pressed-state-layer-opacity
+    );
+    transition-duration: $press-duration;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    &::after {
+      display: none;
+    }
+  }
+}
+
 /// Mixin to apply a disabled state to an element.
 /// Sets the Material Design disabled opacity and blocks pointer interactions.
 @mixin state-disabled() {
   opacity: map.get(MithrilVariables.$states, state-disabled-opacity);
-  pointer-events: none;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 /// Mixin to add padding to an element.
@@ -746,18 +1062,18 @@
 
   $value: MithrilFunctions.px-to-rem($value);
 
-  @if "t" == $direction {
+  @if 't' == $direction {
     margin-top: $value;
-  } @else if "r" == $direction {
+  } @else if 'r' == $direction {
     margin-right: $value;
-  } @else if "b" == $direction {
+  } @else if 'b' == $direction {
     margin-bottom: $value;
-  } @else if "l" == $direction {
+  } @else if 'l' == $direction {
     margin-left: $value;
-  } @else if "v" == $direction {
+  } @else if 'v' == $direction {
     margin-top: $value;
     margin-bottom: $value;
-  } @else if "h" == $direction {
+  } @else if 'h' == $direction {
     margin-right: $value;
     margin-left: $value;
   } @else {

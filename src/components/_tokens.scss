@@ -1,7 +1,8 @@
-@use "sass:map";
-@use "../mixins" as mx;
-@use "../variables" as vars;
-@use "../functions" as fn;
+@use 'sass:map';
+@use 'sass:math';
+@use '../mixins' as mx;
+@use '../variables' as vars;
+@use '../functions' as fn;
 
 /// The look of the opt-in component styles is made of CSS custom properties.
 /// Light is the default, dark follows `data-theme="dark"` (what the theme
@@ -31,7 +32,7 @@ $emit-tokens: true !default;
 /// own classes, a widget): every rule is written under this selector and the tokens on it.
 ///   @use "@zairakai/mithril-scss/components" with ($scope: ".demo");
 $scope: null !default;
-$-light-selector: ":root";
+$-light-selector: ':root';
 $-dark-selector: ':root[data-theme="dark"]';
 $-system-dark-selector: ':root:not([data-theme="light"])';
 
@@ -42,26 +43,24 @@ $-system-dark-selector: ':root:not([data-theme="light"])';
 }
 
 @mixin -component-tokens($dark: false) {
-  $alpha-1: 0.18;
-  $alpha-2: 0.2;
-  $alpha-3: 0.24;
-
-  @if $dark {
-    $alpha-1: 0.6;
-    $alpha-2: 0.6;
-    $alpha-3: 0.7;
-  }
+  // The state layers, the opacities of Material 3 (hover, pressed) over the text color.
+  $hover: math.percentage(
+    map.get(vars.$states, state-hover-state-layer-opacity)
+  );
+  $pressed: math.percentage(
+    map.get(vars.$states, state-pressed-state-layer-opacity)
+  );
 
   --zk-border: rgb(var(--on-surface-rgb) / 18%);
   --zk-border-strong: rgb(var(--on-surface-rgb) / 38%);
   --zk-muted: rgb(var(--on-surface-rgb) / 62%);
-  --zk-hover: rgb(var(--on-surface-rgb) / 6%);
-  --zk-pressed: rgb(var(--on-surface-rgb) / 12%);
+  --zk-hover: rgb(var(--on-surface-rgb) / #{$hover});
+  --zk-pressed: rgb(var(--on-surface-rgb) / #{$pressed});
   --zk-focus: var(--primary);
   --zk-scrim: rgb(0 0 0 / 50%);
-  --zk-shadow-1: 0 1px 3px rgb(0 0 0 / #{$alpha-1});
-  --zk-shadow-2: 0 4px 12px rgb(0 0 0 / #{$alpha-2});
-  --zk-shadow-3: 0 12px 32px rgb(0 0 0 / #{$alpha-3});
+  --zk-shadow-1: #{fn.elevation-shadow(1)};
+  --zk-shadow-2: #{fn.elevation-shadow(2)};
+  --zk-shadow-3: #{fn.elevation-shadow(3)};
 }
 
 @if $emit-tokens {
@@ -72,19 +71,32 @@ $-system-dark-selector: ':root:not([data-theme="light"])';
     --zk-success: #{fn.get-color(green, darken-2)};
     --zk-warning: #{fn.get-color(orange, darken-2)};
     --zk-info: #{fn.get-color(blue, darken-2)};
-    --zk-radius: #{map.get(vars.$shape-radius, 2)};
-    --zk-radius-lg: #{map.get(vars.$shape-radius, medium)};
-    --zk-space-1: #{fn.get-spacing(4, true)};
-    --zk-space-2: #{fn.get-spacing(8, true)};
-    --zk-space-3: #{fn.get-spacing(16, true)};
-    --zk-space-4: #{fn.get-spacing(20, true)};
-    --zk-duration: 150ms;
+    --zk-radius: #{fn.px-to-rem(map.get(vars.$shape-radius, small))};
+    --zk-radius-lg: #{fn.px-to-rem(map.get(vars.$shape-radius, medium))};
+    --zk-space-1: #{fn.get-spacing(4)};
+    --zk-space-2: #{fn.get-spacing(8)};
+    --zk-space-3: #{fn.get-spacing(16)};
+    --zk-space-4: #{fn.get-spacing(20)};
+    --zk-duration: #{fn.get-motion(state, duration)};
+    --zk-easing: #{fn.get-motion(state, easing)};
+
+    // What enters decelerates and takes longer, what leaves accelerates and is faster. Large
+    // elements (a dialog, a drawer) are emphasized, small ones (a menu, a toast) are standard.
+    --zk-duration-enter: #{fn.get-motion(enter, duration)};
+    --zk-easing-enter: #{fn.get-motion(enter, easing)};
+    --zk-duration-exit: #{fn.get-motion(exit, duration)};
+    --zk-easing-exit: #{fn.get-motion(exit, easing)};
+    --zk-duration-enter-small: #{fn.get-motion(enter-small, duration)};
+    --zk-easing-enter-small: #{fn.get-motion(enter-small, easing)};
+    --zk-easing-exit-small: #{fn.get-motion(exit-small, easing)};
+    --zk-duration-exit-small: #{fn.get-motion(exit-small, duration)};
+    --zk-duration-loop: #{map.get(vars.$durations, loop)};
 
     color-scheme: light;
   }
 
   #{$-dark-selector} {
-    @include mx.generate-theme($dark-theme);
+    @include mx.generate-theme($dark-theme, dark);
     @include -component-tokens(true);
 
     --zk-success: #{fn.get-color(green, lighten-1)};
@@ -96,7 +108,7 @@ $-system-dark-selector: ':root:not([data-theme="light"])';
 
   @media (prefers-color-scheme: dark) {
     #{$-system-dark-selector} {
-      @include mx.generate-theme($dark-theme);
+      @include mx.generate-theme($dark-theme, dark);
       @include -component-tokens(true);
 
       --zk-success: #{fn.get-color(green, lighten-1)};
@@ -104,6 +116,32 @@ $-system-dark-selector: ':root:not([data-theme="light"])';
       --zk-info: #{fn.get-color(blue, lighten-1)};
 
       color-scheme: dark;
+    }
+  }
+}
+
+// More contrast: stronger borders and a thicker focus ring, for the readers who ask for it.
+@if $emit-tokens {
+  @media (prefers-contrast: more) {
+    #{$-light-selector},
+    #{$-dark-selector},
+    #{$-system-dark-selector} {
+      --zk-border: rgb(var(--on-surface-rgb) / 60%);
+      --zk-border-strong: rgb(var(--on-surface-rgb) / 100%);
+      --zk-muted: rgb(var(--on-surface-rgb) / 87%);
+    }
+  }
+
+  // Forced colors (Windows high contrast): the system chooses the colors, the borders must stay
+  // and the focus must show.
+  @media (forced-colors: active) {
+    #{$-light-selector},
+    #{$-dark-selector},
+    #{$-system-dark-selector} {
+      --zk-border: CanvasText;
+      --zk-border-strong: CanvasText;
+      --zk-muted: GrayText;
+      --zk-focus: Highlight;
     }
   }
 }

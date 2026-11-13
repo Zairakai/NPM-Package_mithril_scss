@@ -54,6 +54,7 @@
   "exports": {
     ".": "./src/index.scss",
     "./bases/*.scss": "./src/bases/*.scss",
+    "./animations": "./src/animations.scss",
     "./components": "./src/components/index.scss",
     "./src/*.scss": "./src/*.scss",
     "./src/*": "./src/*.scss"

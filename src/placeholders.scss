@@ -1,9 +1,9 @@
-@use "sass:map";
-@use "sass:math";
-@use "sass:meta";
-@use "variables" as MithrilVariables;
-@use "functions" as MithrilFunctions;
-@use "mixins" as MithrilMixins;
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'variables' as MithrilVariables;
+@use 'functions' as MithrilFunctions;
+@use 'mixins' as MithrilMixins;
 
 /// Documentation for placeholder.scss
 /// This file defines utility placeholders used for flexbox, grid, typography, and font properties.
@@ -31,14 +31,14 @@
 /// ========================
 /// Responsive Container
 /// ========================
-/// Placeholder for defining a responsive container.
-/// Dynamically sets the `max-width` of the container based on breakpoints and orientations.
+/// Placeholder for defining a responsive container: it is centered, and its `max-width`
+/// grows with the width class (mobile first: it fills the screen on the `base`).
 %container {
-  @each $orientation, $map in MithrilVariables.$breakpoints {
-    @each $key, $value in $map {
-      @include MithrilMixins.media-queries($key, $orientation) {
-        max-width: MithrilFunctions.get-container($key, $orientation);
-      }
+  margin-inline: auto;
+
+  @each $key, $value in MithrilVariables.$containers {
+    @include MithrilMixins.media-queries($key) {
+      max-width: MithrilFunctions.get-container($key);
     }
   }
 }
@@ -46,16 +46,34 @@
 /// ========================
 /// Typography Styles
 /// ========================
+/// Placeholders of the Material 3 type scale: `%type-display-large` ... `%type-label-small`, and the
+/// emphasized ones, `%type-emphasized-display-large` ...
+/// Each one sets the size, line height, tracking and weight of the style, in rem.
+@each $role, $style in MithrilVariables.$type-scale {
+  %type-#{$role} {
+    @include MithrilMixins.type($role);
+  }
+
+  %type-emphasized-#{$role} {
+    @include MithrilMixins.type($role, true);
+  }
+}
+
+/// ========================
+/// Headings
+/// ========================
 /// Loop through the `$headings` map from 'variables' and generate heading styles for each h1-h6.
 /// Each heading gets its line-height, margin, padding, font-size (fluid), letter-spacing, and font-weight.
 @each $hn, $value in MithrilVariables.$headings {
-  $fluid-key: "h#{$hn}";
+  $fluid-key: 'h#{$hn}';
   $fluid-entry: map.get(MithrilVariables.$font-size-fluid, $fluid-key);
 
   %h#{$hn} {
-    line-height: map.get($value, line-height);
     margin: MithrilFunctions.px-to-rem(map.get($value, margin));
     padding: MithrilFunctions.px-to-rem(map.get($value, padding));
+    font-weight: MithrilFunctions.get-heading($hn, weight);
+    line-height: MithrilFunctions.get-heading($hn, line-height);
+    letter-spacing: MithrilFunctions.get-heading($hn, spacing);
 
     @if null != $fluid-entry {
       font-size: MithrilFunctions.calculate-fluid-font(
@@ -64,9 +82,6 @@
         map.get($fluid-entry, max)
       );
     }
-
-    letter-spacing: map.get($value, spacing);
-    font-weight: map.get($value, weight);
   }
 }
 
@@ -90,7 +105,7 @@
 /// Unitless ratio values (e.g., 1.2) are applied as-is; px values are converted to rem.
 @each $key, $value in MithrilVariables.$line-height {
   %line-height-#{$key} {
-    @if "number" == meta.type-of($value) and "px" == math.unit($value) {
+    @if 'number' == meta.type-of($value) and 'px' == math.unit($value) {
       line-height: MithrilFunctions.px-to-rem($value);
     } @else {
       line-height: $value;

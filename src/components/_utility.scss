@@ -1,17 +1,18 @@
-@use "shared";
+@use 'shared';
+@use '../mixins' as mx;
 
 .theme-switcher {
   display: inline-flex;
-  overflow: hidden;
   border: 1px solid var(--zk-border-strong);
   border-radius: var(--zk-radius);
+  overflow: hidden;
 
-  &-option {
+  @include shared.element(option) {
     @include shared.ghost-button;
 
     border-radius: 0;
 
-    &[aria-pressed="true"] {
+    &[aria-pressed='true'] {
       color: var(--on-primary);
       background: var(--primary);
     }
@@ -23,19 +24,24 @@
 
   border: 1px solid var(--zk-border-strong);
 
-  &-status {
+  @include shared.element(status) {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
-    overflow: hidden;
     clip-path: inset(50%);
+    overflow: hidden;
   }
 }
 
 .countdown {
   font-variant-numeric: tabular-nums;
 
-  &-part + &-part {
+  &#{shared.part(part)} + &#{shared.part(part)} {
     margin-inline-start: var(--zk-space-1);
   }
+}
+
+// The ripple of a press, on anything that is pressed: buttons, list items, cards.
+.ripple {
+  @include mx.ripple;
 }

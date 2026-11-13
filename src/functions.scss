@@ -1,10 +1,11 @@
-@use "sass:color";
-@use "sass:list";
-@use "sass:map";
-@use "sass:math";
-@use "sass:meta";
-@use "sass:string";
-@use "variables" as MithrilVariables;
+@use 'sass:color';
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'sass:string';
+@use 'config' as MithrilConfig;
+@use 'variables' as MithrilVariables;
 
 ////////////////////////////////////////////////////////////////////////////////
 // FILE DOCUMENTATION
@@ -15,7 +16,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Returns a CSS custom property reference for a semantic theme token.
-/// Companion to mx.generate-theme() — use this to reference tokens in your SCSS.
+/// Companion to mx.generate-theme() - use this to reference tokens in your SCSS.
 ///
 /// @param {string} $token - The semantic token name (e.g., 'primary', 'on-surface').
 /// @return {string} - A CSS var() reference, e.g. var(--primary).
@@ -30,13 +31,13 @@
 /// @param {string} $variant - The color variant (e.g., 'default', 'darken-2', 'accent-1'). Default: 'default'.
 /// @return {color} - The hex color value.
 /// @throws Error if the color name or variant does not exist.
-@function get-color($color-name, $variant: "default") {
-  // Resolve the color family by iterating the map — handles keys that are CSS
+@function get-color($color-name, $variant: 'default') {
+  // Resolve the color family by iterating the map - handles keys that are CSS
   // named-color values (e.g. red, blue) or unquoted identifiers (e.g. blue-grey).
   $color-map: null;
 
   @each $key, $value in MithrilVariables.$colors {
-    @if null == $color-map and "#{$key}" == "#{$color-name}" {
+    @if null == $color-map and '#{$key}' == '#{$color-name}' {
       $color-map: $value;
     }
   }
@@ -50,7 +51,7 @@
   $found: false;
 
   @each $key, $value in $color-map {
-    @if not $found and "#{$key}" == "#{$variant}" {
+    @if not $found and '#{$key}' == '#{$variant}' {
       $result: $value;
       $found: true;
     }
@@ -68,7 +69,7 @@
 /// @param {number} $value - The value to process.
 /// @return {number} - The unitless value.
 @function strip-unit($value) {
-  @if "number" == meta.type-of($value) and not math.is-unitless($value) {
+  @if 'number' == meta.type-of($value) and not math.is-unitless($value) {
     $tmp: math.div($value, $value * 0 + 1);
 
     @return $tmp;
@@ -93,11 +94,11 @@
     }
   }
 
-  @if "string" == meta.type-of($value) and "rem" == string.slice($value, -3) {
+  @if 'string' == meta.type-of($value) and 'rem' == string.slice($value, -3) {
     @return $value;
-  } @else if "number" == meta.type-of($value) and "%" == math.unit($value) {
+  } @else if 'number' == meta.type-of($value) and '%' == math.unit($value) {
     @return $value;
-  } @else if "number" != meta.type-of($value) {
+  } @else if 'number' != meta.type-of($value) {
     @warn "calc-rem expects a numeric value (e.g., `16px`, `1rem`, or `16`). Received `#{$value}`. Returning the value as-is.";
     @return $value;
   }
@@ -105,7 +106,7 @@
   // Validate the unit of the value
   $unit: math.unit($value);
 
-  @if "px" != $unit and "" != $unit {
+  @if 'px' != $unit and '' != $unit {
     @warn "calc-rem expects a pixel value (e.g., `16px`, `1rem`, or `16`) or a unitless number. Received `#{$value}` with unit `#{$unit}`. Returning the value as-is.";
     @return $value;
   }
@@ -117,6 +118,22 @@
   @return $result + rem;
 }
 
+/// Converts a length in px to rem and leaves the rest as it is: a keyword (`normal`), a
+/// percentage (`100%`), a unitless number. For the properties that take both, like `letter-spacing`.
+///
+/// @param {number|string} $value - The pixel value, or the keyword.
+/// @return {number|string} - The value in rem, or the keyword.
+@function length-to-rem($value) {
+  @if 'number' == meta.type-of($value) and
+    0 != $value and
+    'px' == math.unit($value)
+  {
+    @return px-to-rem($value);
+  }
+
+  @return $value;
+}
+
 /// Converts one or multiple pixel values to rem units.
 ///
 /// @param {number|list<number>} $px - The pixel value(s) to convert.
@@ -126,19 +143,19 @@
 /// @return {number|string|list<number|string>} - The rem value(s).
 /// @throws Error if the input is not a number or list of numbers.
 @function px-to-rem($px, $options: ()) {
-  $base-font-size: MithrilVariables.$default-font-size;
+  $base-font-size: MithrilConfig.$default-font-size;
 
-  @if map.has-key($options, "base-font-size") {
-    $base-font-size: map.get($options, "base-font-size");
+  @if map.has-key($options, 'base-font-size') {
+    $base-font-size: map.get($options, 'base-font-size');
   }
 
   $force-rem-zero: false;
 
-  @if map.has-key($options, "force-zero-rem") {
-    $force-rem-zero: map.get($options, "force-zero-rem");
+  @if map.has-key($options, 'force-zero-rem') {
+    $force-rem-zero: map.get($options, 'force-zero-rem');
   }
 
-  @if "list" == meta.type-of($px) {
+  @if 'list' == meta.type-of($px) {
     $rem-list: ();
 
     @each $value in $px {
@@ -163,17 +180,17 @@
 /// @throws Error if the specified symmetry type is invalid.
 @function corners-cut-symmetry($corners, $symmetry) {
   $pair-mapping: (
-    "horizontal": (
-      ("top-left", "bottom-left"),
-      ("top-right", "bottom-right"),
+    'horizontal': (
+      ('top-left', 'bottom-left'),
+      ('top-right', 'bottom-right'),
     ),
-    "vertical": (
-      ("top-left", "top-right"),
-      ("bottom-left", "bottom-right"),
+    'vertical': (
+      ('top-left', 'top-right'),
+      ('bottom-left', 'bottom-right'),
     ),
-    "diagonal": (
-      ("top-left", "bottom-right"),
-      ("top-right", "bottom-left"),
+    'diagonal': (
+      ('top-left', 'bottom-right'),
+      ('top-right', 'bottom-left'),
     ),
   );
 
@@ -234,11 +251,113 @@
     @error "Property '#{$property}' does not exist in key '#{$key}' at level '#{$level}'.";
   }
 
-  @if "size" == $property {
+  @if 'size' == $property {
     @return px-to-rem(map.get($key-map, $property));
   }
 
   @return map.get($key-map, $property);
+}
+
+/// How light a color looks to the eye, from 0 (black) to 100 (white): the `L*` of CIELAB, the
+/// measure that the tones of Material 3 are made on. Two colors with the same tone have the same
+/// contrast against black and white, whatever their hue.
+///
+/// @param {color} $color - The color.
+/// @return {number} - Its tone, from 0 to 100.
+@function color-tone-of($color) {
+  @return strip-unit(color.channel($color, 'lightness', $space: lab));
+}
+
+/// The color of a tone: the hue and the chroma (how vivid) of `$color`, at the tone asked, from 0
+/// (black) to 100 (white). It is how Material 3 builds its roles from one color: a container is
+/// tone 90, the text on it tone 10. The tone is exact (CIELAB `L*`). Material works on the hue and
+/// the chroma of HCT, close to the ones of CIELCH used here, so the colors are close to Material's
+/// but not always identical (the baseline purple at tone 90 is `#ecdfff`, Material has `#eaddff`).
+/// A color that cannot be shown at that tone and chroma gets the nearest one that can.
+///
+/// @param {color} $color - The color that gives the hue and the chroma.
+/// @param {number} $tone - The tone, from 0 to 100.
+/// @return {color} - The color of that tone.
+/// @throws Error if the tone is not between 0 and 100.
+@function color-tone($color, $tone) {
+  @if $tone < 0 or $tone > 100 {
+    @error "The tone must be between 0 and 100. Received `#{$tone}`.";
+  }
+
+  $toned: color.change($color, $lightness: $tone * 1%, $space: lch);
+  $found: color.to-space(
+    color.to-gamut($toned, $space: srgb, $method: local-minde),
+    srgb
+  );
+
+  // Whole channels: a color in the usual form, not a list of fractions.
+  @return rgb(
+    math.round(color.channel($found, 'red', $space: rgb)),
+    math.round(color.channel($found, 'green', $space: rgb)),
+    math.round(color.channel($found, 'blue', $space: rgb))
+  );
+}
+
+/// A value of `$motion`, ready to write: a key of `$durations` or `$easings` becomes its value.
+///
+/// @param {string} $name - The kind of movement (`enter`, `exit`, `enter-small`, `state`...).
+/// @param {string} $property - `duration` or `easing`.
+/// @return {number|list} - The time or the curve.
+/// @throws Error if the movement or the property does not exist.
+@function get-motion($name, $property) {
+  @if not map.has-key(MithrilVariables.$motion, $name) {
+    @error "Motion '#{$name}' not found. Available: #{map.keys(MithrilVariables.$motion)}.";
+  }
+
+  $motion: map.get(MithrilVariables.$motion, $name);
+
+  @if not map.has-key($motion, $property) {
+    @error "Property '#{$property}' not found for the motion '#{$name}'.";
+  }
+
+  $value: map.get($motion, $property);
+  $scale: MithrilVariables.$durations;
+
+  @if 'easing' == $property {
+    $scale: MithrilVariables.$easings;
+  }
+
+  @if map.has-key($scale, $value) {
+    @return map.get($scale, $value);
+  }
+
+  @return $value;
+}
+
+/// The `box-shadow` of an elevation level: its two layers of shadow, in rem.
+///
+/// @param {number} $level - The level (0 to 5).
+/// @param {color|null} $color - The color of the shadow. Default: the color of each layer in `$elevations`.
+/// @return {list} - The shadow, to use as the value of `box-shadow` or of a custom property.
+/// @throws Error if the level does not exist.
+@function elevation-shadow($level, $color: null) {
+  @if not map.has-key(MithrilVariables.$elevations, $level) {
+    @error "Level '#{$level}' does not exist in $elevations. Available: #{map.keys(MithrilVariables.$elevations)}.";
+  }
+
+  $shadows: ();
+
+  @each $layer, $properties in map.get(MithrilVariables.$elevations, $level) {
+    $layer-color: map.get($properties, color);
+
+    @if $color {
+      $layer-color: $color;
+    }
+
+    $shadows: list.append(
+      $shadows,
+      px-to-rem(map.get($properties, size))
+        color-alpha($layer-color, map.get($properties, alpha)),
+      comma
+    );
+  }
+
+  @return $shadows;
 }
 
 /// Determines the most readable color based on background lightness.
@@ -248,81 +367,141 @@
 /// background colors.
 ///
 /// @param {color} $background - The background color to evaluate.
-/// @param {color} $colorDark - The dark color to use for light backgrounds.
-/// @param {color} $colorLight - The light color to use for dark backgrounds.
+/// @param {color} $dark - The dark color to use for light backgrounds.
+/// @param {color} $light - The light color to use for dark backgrounds.
+/// @param {number} $threshold - The lightness (0 to 100) above which a background counts as light. Defaults to 50.
 /// @return {color} - The chosen color (dark or light) for better readability.
-@function color-lisibility($background, $colorDark, $colorLight, $threshold: 50) {
+@function color-legibility($background, $dark, $light, $threshold: 50) {
   @if $threshold < color.lightness($background) {
-    @return $colorDark;
+    @return $dark;
   } @else {
-    @return $colorLight;
+    @return $light;
   }
 }
 
-/// Retrieves a container value from the map.
-/// This function retrieves a specific container value based on the provided
-/// key and orientation (e.g., 'landscape' or 'portrait'). It returns the
-/// value for the requested container after performing validation checks.
+/// Misspelled name of `color-legibility()`, kept so that existing code keeps compiling.
 ///
-/// @param {string} $key - The container key.
-/// @param {string} $orientation - The orientation to use ('landscape' or 'portrait').
-/// @return {Number} - The value of the requested container key.
-/// @throws Error if the container key is not found.
-@function get-container($key, $orientation) {
-  @if not map.has-key(MithrilVariables.$breakpoints, $orientation) {
-    @error "Orientation '#{$orientation}' not available, use 'landscape' or 'portrait'.";
+/// @deprecated Use `color-legibility()`.
+/// @param {color} $background - The background color to evaluate.
+/// @param {color} $colorDark - The dark color to use for light backgrounds.
+/// @param {color} $colorLight - The light color to use for dark backgrounds.
+/// @param {number} $threshold - The lightness (0 to 100) above which a background counts as light. Defaults to 50.
+/// @return {color} - The chosen color (dark or light) for better readability.
+@function color-lisibility(
+  $background,
+  $colorDark,
+  $colorLight,
+  $threshold: 50
+) {
+  @warn "color-lisibility() is deprecated, use color-legibility().";
+  @return color-legibility($background, $colorDark, $colorLight, $threshold);
+}
+
+/// The width from which a width class starts.
+///
+/// @param {string} $key - The width class (`medium`...).
+/// @return {number} - The minimum width, in px.
+/// @throws Error if the class does not exist.
+@function breakpoint-min($key) {
+  @if not map.has-key(MithrilVariables.$breakpoints, $key) {
+    @error "Breakpoint '#{$key}' not found. Available: #{map.keys(MithrilVariables.$breakpoints)}.";
   }
 
-  $container: map.get(MithrilVariables.$containers, $orientation);
+  @return map.get(MithrilVariables.$breakpoints, $key);
+}
 
-  @if not map.has-key($container, $key) {
-    @error "Container '#{$key}' not found for orientation '#{$orientation}'.";
+/// The width up to which a width class goes: one pixel before the next class starts.
+///
+/// @param {string} $key - The width class.
+/// @return {number|null} - The maximum width, in px, or `null` for the last class.
+/// @throws Error if the class does not exist.
+@function breakpoint-max($key) {
+  $keys: map.keys(MithrilVariables.$breakpoints);
+  $index: list.index($keys, $key);
+
+  @if null == $index {
+    @error "Breakpoint '#{$key}' not found. Available: #{$keys}.";
   }
 
-  @return px-to-rem(map.get($container, $key));
+  @if $index == list.length($keys) {
+    @return null;
+  }
+
+  $next: map.get(MithrilVariables.$breakpoints, list.nth($keys, $index + 1));
+
+  @return $next - 1px;
+}
+
+/// Retrieves a container width from the map.
+///
+/// @param {string} $key - The width class (`medium`, or `base`...).
+/// @return {number|string} - The maximum width in rem, or `100%` for `base`.
+/// @throws Error if the container is not found.
+@function get-container($key) {
+  @if not map.has-key(MithrilVariables.$containers, $key) {
+    @error "Container '#{$key}' not found. Available: #{map.keys(MithrilVariables.$containers)}.";
+  }
+
+  @return length-to-rem(map.get(MithrilVariables.$containers, $key));
 }
 
 /// Retrieves a grid property value from the map.
-/// This function retrieves a grid property (e.g., 'columns', 'gutters') for
-/// a specific orientation (e.g., 'landscape' or 'portrait'). It performs
-/// checks to ensure that the grid key and property exist.
 ///
-/// @param {string} $key - The grid key (e.g., 'columns', 'gutters').
-/// @param {string} $property - The specific property to retrieve (e.g., 'offset-x').
-/// @param {string} $orientation - The orientation to use ('landscape' or 'portrait').
-/// @return {any} - The value of the requested grid property.
-/// @throws Error if the grid key or property is not found.
-@function get-grid($key, $property, $orientation) {
-  @if not map.has-key(MithrilVariables.$breakpoints, $orientation) {
-    @error "Orientation '#{$orientation}' not available, use 'landscape' or 'portrait'.";
+/// @param {string} $key - The width class (`base`, `medium`, `expanded`).
+/// @param {string} $property - `cols`, `gap` or `margin`.
+/// @return {number} - The value, in rem for `gap` and `margin`.
+/// @throws Error if the class or the property is not found.
+@function get-grid($key, $property) {
+  @if not map.has-key(MithrilVariables.$grids, $key) {
+    @error "Grid '#{$key}' not found. Available: #{map.keys(MithrilVariables.$grids)}.";
   }
 
-  $grid: map.get(MithrilVariables.$grids, $orientation);
-
-  @if not map.has-key($grid, $key) {
-    @error "Grid '#{$key}' not found for orientation '#{$orientation}'.";
-  }
-
-  $grid: map.get($grid, $key);
+  $grid: map.get(MithrilVariables.$grids, $key);
 
   @if not map.has-key($grid, $property) {
-    @error "Property '#{$property}' not found for the key '#{$key}' of orientation '#{$orientation}'.";
+    @error "Property '#{$property}' not found for the grid '#{$key}'.";
   }
 
-  @if "gap" == $property {
-    @return px-to-rem(map.get($grid, $property));
+  @return length-to-rem(map.get($grid, $property));
+}
+
+/// Retrieves a property of a style of the type scale, ready to write: sizes, line heights
+/// and tracking in rem, and the weight as a number.
+///
+/// @param {string} $role - The style (`body-medium`, `headline-large`...).
+/// @param {string} $property - `size`, `line-height`, `tracking`, `weight`, `emphasized-weight` or `font`.
+/// @return {number|string} - The value.
+/// @throws Error if the style or the property is not found.
+@function get-type($role, $property) {
+  @if not map.has-key(MithrilVariables.$type-scale, $role) {
+    @error "Type style '#{$role}' not found. Available: #{map.keys(MithrilVariables.$type-scale)}.";
   }
 
-  @return map.get($grid, $property);
+  $style: map.get(MithrilVariables.$type-scale, $role);
+
+  @if not map.has-key($style, $property) {
+    @error "Property '#{$property}' not found for the type style '#{$role}'. Available: #{map.keys($style)}.";
+  }
+
+  $value: map.get($style, $property);
+
+  @if 'weight' == $property or 'emphasized-weight' == $property {
+    @return map.get(MithrilVariables.$font-weight, $value);
+  }
+
+  @if 'font' == $property {
+    @return string.unquote(map.get(MithrilVariables.$font-family, $value));
+  }
+
+  @return length-to-rem($value);
 }
 
 /// Retrieves a heading property value from the map.
-/// This function retrieves a specific heading property (e.g., 'font-size')
-/// based on the heading level (e.g., 'h1', 'h2'). It ensures that both
-/// the heading level and property exist in the map before returning the value.
+/// The text properties (`line-height`, `spacing`, `weight`) come from the style of the type
+/// scale that the heading uses (`role`).
 ///
-/// @param {string} $level - The heading level (e.g., 'h1', 'h2').
-/// @param {string} $property - The property to retrieve (e.g., 'font-size').
+/// @param {string} $level - The heading level (1 to 6).
+/// @param {string} $property - `margin`, `padding`, `role`, `line-height`, `spacing` or `weight`.
 /// @return {any} - The value of the requested heading property.
 /// @throws Error if the heading level or property is not found.
 @function get-heading($level, $property) {
@@ -331,12 +510,25 @@
   }
 
   $heading: map.get(MithrilVariables.$headings, $level);
+  $role: map.get($heading, role);
+
+  @if 'line-height' == $property {
+    @return get-type($role, line-height);
+  }
+
+  @if 'spacing' == $property {
+    @return get-type($role, tracking);
+  }
+
+  @if 'weight' == $property {
+    @return get-type($role, weight);
+  }
 
   @if not map.has-key($heading, $property) {
     @error "Property '#{$property}' of heading level '#{$level}' not found.";
   }
 
-  @if "margin" == $property or "padding" == $property {
+  @if 'margin' == $property or 'padding' == $property {
     @return px-to-rem(map.get($heading, $property));
   }
 
@@ -368,8 +560,8 @@
 
 /// Retrieves a line-height value from the map.
 /// This function retrieves a line-height value based on the provided key
-/// (e.g., 'small', 'medium'). It does not require conversion to rem, as
-/// the map stores values already in rem units.
+/// (e.g., 'small', 'medium'). The value is returned as stored: a ratio without
+/// unit, or a length in px that the caller converts with `px-to-rem()`.
 ///
 /// @param {string} $key - The line-height key (e.g., 'small', 'medium').
 /// @return {number} - The line-height value.
@@ -426,9 +618,9 @@
 /// @param {boolean} $as-rgb - If true, the color is returned in RGB format. Defaults to true, meaning the color will be returned as `rgb(red green blue)`.
 /// @return {color, list} - The color with transparency applied in either `rgb` format or as a list of red, green, and blue channels.
 @function color-rgb($color, $as-rgb: true) {
-  $red: color.channel($color, "red", $space: rgb);
-  $green: color.channel($color, "green", $space: rgb);
-  $blue: color.channel($color, "blue", $space: rgb);
+  $red: color.channel($color, 'red', $space: rgb);
+  $green: color.channel($color, 'green', $space: rgb);
+  $blue: color.channel($color, 'blue', $space: rgb);
 
   @if true == $as-rgb {
     @return rgb($red $green $blue);
@@ -442,12 +634,12 @@
 /// and returns the color in RGBA format.
 ///
 /// @param {color} $color - The color to modify.
-/// @param {number} $opacity - The desired opacity level, from 0% (fully transparent) to 100% (fully opaque). Defaults to 50%.
+/// @param {number} $opacity - The desired opacity level: a ratio from 0 (fully transparent) to 1 (fully opaque), or a percentage from 0% to 100%. Defaults to 50%.
 /// @return {color} - The color with the specified alpha value applied in RGBA format.
 @function color-alpha($color, $opacity: 50%) {
   $alpha: $opacity;
 
-  @if "%" == math.unit($opacity) {
+  @if '%' == math.unit($opacity) {
     $alpha: math.div($opacity, 100%);
   }
 
