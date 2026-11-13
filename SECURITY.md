@@ -31,7 +31,7 @@ Please **do not disclose vulnerabilities publicly** until they have been reviewe
 
 `@zairakai/mithril-scss` provides a modular SCSS framework (grid, spacing, mixins):
 
-- no JavaScript — purely SCSS/CSS output
+- no JavaScript - purely SCSS/CSS output
 - no external network calls at any stage
 - no dynamic code execution
 

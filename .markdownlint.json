@@ -1,3 +1,1 @@
-{
-  "extends": "config/dev-tools/.markdownlint.json"
-}
+{ "extends": "./config/dev-tools/.markdownlint.json" }
