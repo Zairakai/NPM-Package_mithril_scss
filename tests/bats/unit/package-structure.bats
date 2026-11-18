@@ -14,9 +14,8 @@ teardown() {
   teardown_test_env
 }
 
-# ============================================================================
 # Root config files
-# ============================================================================
+# ================
 
 @test ".gitlab-ci.yml exists" {
   assert_file_exists "${PROJECT_ROOT}/.gitlab-ci.yml"
@@ -57,9 +56,8 @@ teardown() {
   done
 }
 
-# ============================================================================
 # config/dev-tools/
-# ============================================================================
+# ================
 
 @test "config/dev-tools/ holds the configuration of each tool" {
   for file in eslint.config.js prettier.config.js stylelint.config.js knip.config.js vitest.config.js \
@@ -84,9 +82,8 @@ teardown() {
   assert_file_contains "${PROJECT_ROOT}/package.json" '"@zairakai/js-dev-tools":'
 }
 
-# ============================================================================
 # Writing rules
-# ============================================================================
+# ================
 
 @test ".editorconfig has the 80 columns of JavaScript and no 120" {
   assert_file_contains "${PROJECT_ROOT}/.editorconfig" "[*.{js,mjs,ts}]"
@@ -132,18 +129,16 @@ teardown() {
   [ -z "$output" ]
 }
 
-# ============================================================================
 # npm: no yarn
-# ============================================================================
+# ================
 
 @test "yarn.lock does not exist" {
   run test -f "${PROJECT_ROOT}/yarn.lock"
   [ "$status" -ne 0 ]
 }
 
-# ============================================================================
 # src/ entry points
-# ============================================================================
+# ================
 
 @test "the entry points of src/ exist" {
   for file in index.scss grid.scss spacing.scss variables.scss mixins.scss functions.scss placeholders.scss \
@@ -158,9 +153,8 @@ teardown() {
   assert_file_contains "${PROJECT_ROOT}/package.json" '"./components": "./src/components/index.scss"'
 }
 
-# ============================================================================
 # package.json
-# ============================================================================
+# ================
 
 @test "package.json includes src/ in files[]" {
   run grep -q '"src"' "${PROJECT_ROOT}/package.json"
@@ -177,9 +171,8 @@ teardown() {
   [ "$status" -eq 0 ]
 }
 
-# ============================================================================
 # .gitlab-ci.yml
-# ============================================================================
+# ================
 
 @test ".gitlab-ci.yml includes pipeline-js-package.yml" {
   run grep -q 'pipeline-js-package.yml' "${PROJECT_ROOT}/.gitlab-ci.yml"
