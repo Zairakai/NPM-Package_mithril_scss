@@ -244,4 +244,29 @@ describe('exports of the package', () => {
       expect(count(withSeparator('__'))).toBe(count(css))
     })
   })
+
+  describe('accessibility', () => {
+    const css = sass.compile(entry, { style: 'expanded' }).css
+
+    it('writes the state layers with the opacities of Material 3', () => {
+      expect(css).toContain('--zk-hover: rgb(var(--on-surface-rgb) / 8%)')
+      expect(css).toContain('--zk-pressed: rgb(var(--on-surface-rgb) / 12%)')
+    })
+
+    it('strengthens the borders when more contrast is asked', () => {
+      expect(css).toMatch(
+        /prefers-contrast: more\)\s*{[^}]*--zk-border: rgb\(var\(--on-surface-rgb\) \/ 60%\)/,
+      )
+    })
+
+    it('uses the system colors in forced colors', () => {
+      expect(css).toMatch(
+        /forced-colors: active\)\s*{[^}]*--zk-border: CanvasText[^}]*--zk-focus: Highlight/,
+      )
+    })
+
+    it('has a ripple class', () => {
+      expect(css).toMatch(/\.ripple:active::after\s*{[^}]*opacity: 0\.12/)
+    })
+  })
 })
