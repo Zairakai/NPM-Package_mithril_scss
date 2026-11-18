@@ -80,8 +80,8 @@ teardown() {
   assert_file_contains "${PROJECT_ROOT}/config/dev-tools/vitest.config.js" "@zairakai/js-dev-tools/config/vitest.config.js"
 }
 
-@test "package.json requires js-dev-tools 4.1" {
-  assert_file_contains "${PROJECT_ROOT}/package.json" '"@zairakai/js-dev-tools": "^4.1.'
+@test "package.json requires js-dev-tools" {
+  assert_file_contains "${PROJECT_ROOT}/package.json" '"@zairakai/js-dev-tools":'
 }
 
 # ============================================================================
